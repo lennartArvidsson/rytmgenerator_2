@@ -1,0 +1,197 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    padding: 0;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#container {
+    display: flex;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ARBETSYTA */
+main {
+    flex: 1;
+}
+
+#arbets-kontroller {
+    background-color: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.kontroll-grupp {
+    margin-bottom: 15px;
+}
+
+.kontroll-grupp:last-child {
+    margin-bottom: 0;
+}
+
+.kontroll-grupp label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.kontroll-grupp input[type="range"] {
+    width: 100%;
+}
+
+#rytm-grid {
+    display: grid;
+    grid-template-columns: repeat(16, 40px);
+    gap: 5px;
+    margin: 30px 0;
+    justify-content: center;
+}
+
+.ruta {
+    width: 40px;
+    height: 40px;
+    background-color: #bbb;
+    border: 1px solid #999;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 4px;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.ruta.spelar {
+    background-color: #e0e0e0;
+}
+
+.ruta.aktiv {
+    background-color: #4CAF50;
+    border-color: #388E3C;
+}
+
+.ruta.aktiv.spelar {
+    background-color: #8FD694;
+}
+
+/* Block-styling - skapa visuell sammanslagning med utsträckt bakgrund */
+.ruta.aktiv.block-start {
+    border-radius: 4px 0 0 4px;
+    border-right: none;
+}
+
+/* Förläng bakgrunden åt höger för att täcka gapet */
+.ruta.aktiv.block-start::after,
+.ruta.aktiv.block-mitt::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    right: -6px;
+    width: 7px;
+    height: calc(100% + 2px);
+    background-color: #4CAF50;
+    z-index: 0;
+}
+
+.ruta.aktiv.block-start.spelar::after,
+.ruta.aktiv.block-mitt.spelar::after {
+    background-color: #8FD694;
+}
+
+.ruta.aktiv.block-mitt {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+}
+
+.ruta.aktiv.block-slut {
+    border-radius: 0 4px 4px 0;
+    border-left: none;
+}
+
+.ruta.aktiv.block-ensam {
+    border-radius: 4px;
+}
+
+/* Drag-förhandsvisning */
+.ruta.drag-förhandsvisning {
+    background-color: #81C784;
+    opacity: 0.8;
+}
+
+#kontroller {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    background-color: #2196F3;
+    color: white;
+}
+
+button:hover {
+    background-color: #0b7dda;
+}
+
+#rensa {
+    background-color: #f44336;
+}
+
+#rensa:hover {
+    background-color: #da190b;
+}
+
+/* ASIDE - INSTÄLLNINGAR */
+aside {
+    width: 280px;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+aside h2 {
+    margin-top: 0;
+    font-size: 18px;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.inställnings-grupp {
+    margin-bottom: 20px;
+}
+
+.inställnings-grupp label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.inställnings-grupp select {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#tillämpa {
+    width: 100%;
+    background-color: #4CAF50;
+}
+
+#tillämpa:hover {
+    background-color: #45a049;
+}
