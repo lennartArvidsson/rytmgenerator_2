@@ -1,92 +1,127 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="sv">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rytmgenerator</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
 
-<body>
+  <body>
     <h1>Rytmgenerator</h1>
 
     <div id="container">
-        <!-- ARBETSYTA -->
-        <main>
-            <!-- Snabba kontroller -->
-            <div id="arbets-kontroller">
-                <div class="kontroll-grupp">
-                    <label for="tempo-slider">Tempo: <span id="tempo-värde">120</span> BPM</label>
-                    <input type="range" id="tempo-slider" min="40" max="200" value="120">
-                </div>
+      <!-- ARBETSYTA -->
+      <main>
+        <!-- Snabba kontroller -->
+        <div id="arbets-kontroller">
+          <div class="kontroll-grupp">
+            <label for="tempo-slider"
+              >Tempo: <span id="tempo-värde">120</span> BPM</label
+            >
+            <input
+              type="range"
+              id="tempo-slider"
+              min="40"
+              max="200"
+              value="120"
+            />
+          </div>
 
-                <div class="kontroll-grupp">
-                    <label for="volym-slider">Volym diskant: <span id="volym-värde">30</span>%</label>
-                    <input type="range" id="volym-slider" min="0" max="100" value="30">
-                </div>
+          <div class="kontroll-grupp">
+            <label for="volym-slider"
+              >Volym diskant: <span id="volym-värde">30</span>%</label
+            >
+            <input
+              type="range"
+              id="volym-slider"
+              min="0"
+              max="100"
+              value="30"
+            />
+          </div>
 
-                <div class="kontroll-grupp" id="volym-track2-grupp" style="display: none;">
-                    <label for="volym-track2-slider">Volym bas: <span id="volym-track2-värde">30</span>%</label>
-                    <input type="range" id="volym-track2-slider" min="0" max="100" value="30">
-                </div>
+          <div
+            class="kontroll-grupp"
+            id="volym-track2-grupp"
+            style="display: none"
+          >
+            <label for="volym-track2-slider"
+              >Volym bas: <span id="volym-track2-värde">30</span>%</label
+            >
+            <input
+              type="range"
+              id="volym-track2-slider"
+              min="0"
+              max="100"
+              value="30"
+            />
+          </div>
 
-                <div class="kontroll-grupp">
-                    <label for="tonlangd-slider">Pulstid: <span id="tonlangd-värde">100</span>ms</label>
-                    <input type="range" id="tonlangd-slider" min="50" max="500" value="100" step="10">
-                </div>
-            </div>
+          <div class="kontroll-grupp">
+            <label for="tonlangd-slider"
+              >Pulstid: <span id="tonlangd-värde">100</span>ms</label
+            >
+            <input
+              type="range"
+              id="tonlangd-slider"
+              min="50"
+              max="500"
+              value="100"
+              step="10"
+            />
+          </div>
+        </div>
 
-            <!-- Rytmgrid -->
-            <div id="rytm-grid"></div>
+        <!-- Rytmgrid -->
+        <div id="rytm-grid"></div>
 
-            <!-- Spelknappar -->
-            <div id="kontroller">
-                <button id="spela">Spela</button>
-                <button id="stopp">Stopp</button>
-                <button id="rensa">Rensa</button>
-            </div>
-        </main>
+        <!-- Spelknappar -->
+        <div id="kontroller">
+          <button id="spela">Spela</button>
+          <button id="stopp">Stopp</button>
+          <button id="rensa">Rensa</button>
+        </div>
+      </main>
 
-        <!-- INSTÄLLNINGAR ASIDE -->
-        <aside>
-            <h2>Projektinställningar</h2>
+      <!-- INSTÄLLNINGAR ASIDE -->
+      <aside>
+        <h2>Projektinställningar</h2>
 
-            <div class="inställnings-grupp">
-                <label for="taktart">Taktart:</label>
-                <select id="taktart">
-                    <option value="4/4">4/4</option>
-                    <option value="3/4">3/4</option>
-                    <option value="6/8">6/8</option>
-                    <option value="2/2">2/2</option>
-                </select>
-            </div>
+        <div class="inställnings-grupp">
+          <label for="taktart">Taktart:</label>
+          <select id="taktart">
+            <option value="4/4">4/4</option>
+            <option value="3/4">3/4</option>
+            <option value="6/8">6/8</option>
+            <option value="2/2">2/2</option>
+          </select>
+        </div>
 
-            <div class="inställnings-grupp">
-                <label for="antal-tracks">Antal tracks:</label>
-                <select id="antal-tracks">
-                    <option value="1">1 (Diskant)</option>
-                    <option value="2">2 (Diskant + Bas)</option>
-                </select>
-            </div>
+        <div class="inställnings-grupp">
+          <label for="antal-tracks">Antal tracks:</label>
+          <select id="antal-tracks">
+            <option value="1">1 (Diskant)</option>
+            <option value="2">2 (Diskant + Bas)</option>
+          </select>
+        </div>
 
-            <div class="inställnings-grupp">
-                <label for="minsta-enhet">Minsta enhet:</label>
-                <select id="minsta-enhet">
-                    <option value="4">1/4-delar (4 per takt)</option>
-                    <option value="8">1/8-delar (8 per takt)</option>
-                    <option value="16" selected>1/16-delar (16 per takt)</option>
-                    <option value="32">1/32-delar (32 per takt)</option>
-                </select>
-            </div>
+        <div class="inställnings-grupp">
+          <label for="minsta-enhet">Minsta enhet:</label>
+          <select id="minsta-enhet">
+            <option value="4">1/4-delar (4 per takt)</option>
+            <option value="8">1/8-delar (8 per takt)</option>
+            <option value="16" selected>1/16-delar (16 per takt)</option>
+            <option value="32">1/32-delar (32 per takt)</option>
+          </select>
+        </div>
 
-            <div class="inställnings-grupp">
-                <button id="tillämpa">Tillämpa ändringar</button>
-            </div>
-        </aside>
+        <div class="inställnings-grupp">
+          <button id="tillämpa">Tillämpa ändringar</button>
+        </div>
+      </aside>
     </div>
 
-    <script src="scripts.js"></script>
-</body>
-
+    <script src="rytm-app.js"></script>
+  </body>
 </html>

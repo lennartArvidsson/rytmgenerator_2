@@ -179,6 +179,61 @@ function beräknaAntalRutor(taktart, minstaEnhet) {
     return täljare * (minstaEnhet / nämnare);
 }
 
+// ============ DRAG-FUNKTIONER (gemensamma för mouse och touch) ============
+
+function startDrag(rad, kol, e) {
+    e.preventDefault();
+    ärIDrag = true;
+    dragRad = rad;
+    dragStartKol = kol;
+    dragSlutKol = kol;
+    visaDragFörhandsvisning();
+}
+
+function updateDrag(rad, kol) {
+    if (!ärIDrag) return;
+    if (rad === dragRad) {
+        dragSlutKol = kol;
+        visaDragFörhandsvisning();
+    }
+}
+
+function avslutaDrag() {
+    if (!ärIDrag) return;
+    
+    const startKol = Math.min(dragStartKol, dragSlutKol);
+    const slutKol = Math.max(dragStartKol, dragSlutKol);
+    const längd = slutKol - startKol + 1;
+    
+    // Kolla om vi klickar på ett existerande block (för att ta bort det)
+    if (längd === 1) {
+        const existerandeBlock = hittaBlock(dragRad, startKol);
+        if (existerandeBlock) {
+            taBortBlock(dragRad, existerandeBlock);
+        } else {
+            läggTillBlock(dragRad, startKol, 1);
+        }
+    } else {
+        // Dra = skapa nytt block
+        läggTillBlock(dragRad, startKol, längd);
+    }
+    
+    ärIDrag = false;
+    dragRad = null;
+    dragStartKol = null;
+    dragSlutKol = null;
+    
+    rensaDragFörhandsvisning();
+    renderaBlock();
+}
+
+// Globala event listeners för att avsluta drag
+document.addEventListener('mouseup', avslutaDrag);
+document.addEventListener('touchend', avslutaDrag);
+document.addEventListener('touchcancel', avslutaDrag);
+
+// =========================================================================
+
 // Funktion för att skapa/återskapa gridet
 function skapaGrid() {
     grid.innerHTML = '';
@@ -198,70 +253,41 @@ function skapaGrid() {
             ruta.dataset.rad = rad;
             ruta.dataset.kol = kol;
 
-            // Mousedown - starta drag eller klick
-            ruta.addEventListener('mousedown', function (e) {
+            // ============ MOUSE EVENTS ============
+            ruta.addEventListener('mousedown', function(e) {
                 if (e.button !== 0) return; // Endast vänsterklick
-                e.preventDefault();
-                
-                const r = parseInt(this.dataset.rad);
-                const k = parseInt(this.dataset.kol);
-                
-                ärIDrag = true;
-                dragRad = r;
-                dragStartKol = k;
-                dragSlutKol = k;
-                
-                visaDragFörhandsvisning();
+                startDrag(parseInt(this.dataset.rad), parseInt(this.dataset.kol), e);
             });
 
-            // Mouseover - uppdatera drag
-            ruta.addEventListener('mouseover', function () {
-                if (!ärIDrag) return;
-                
-                const r = parseInt(this.dataset.rad);
-                const k = parseInt(this.dataset.kol);
-                
-                // Endast samma rad
-                if (r === dragRad) {
-                    dragSlutKol = k;
-                    visaDragFörhandsvisning();
-                }
+            ruta.addEventListener('mouseover', function() {
+                updateDrag(parseInt(this.dataset.rad), parseInt(this.dataset.kol));
             });
+
+            // ============ TOUCH EVENTS (för iPad/mobil) ============
+            ruta.addEventListener('touchstart', function(e) {
+                // Förhindra text-markering och andra default-beteenden
+                e.preventDefault();
+                startDrag(parseInt(this.dataset.rad), parseInt(this.dataset.kol), e);
+            }, { passive: false });
+
+            ruta.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                // Hitta vilket element vi är över just nu
+                const touch = e.touches[0];
+                const element = document.elementFromPoint(touch.clientX, touch.clientY);
+                
+                if (element && element.classList.contains('ruta')) {
+                    updateDrag(
+                        parseInt(element.dataset.rad), 
+                        parseInt(element.dataset.kol)
+                    );
+                }
+            }, { passive: false });
 
             grid.appendChild(ruta);
             rutor[rad].push(ruta);
         }
     }
-
-    // Mouseup - avsluta drag
-    document.addEventListener('mouseup', function (e) {
-        if (!ärIDrag) return;
-        
-        const startKol = Math.min(dragStartKol, dragSlutKol);
-        const slutKol = Math.max(dragStartKol, dragSlutKol);
-        const längd = slutKol - startKol + 1;
-        
-        // Kolla om vi klickar på ett existerande block (för att ta bort det)
-        if (längd === 1) {
-            const existerandeBlock = hittaBlock(dragRad, startKol);
-            if (existerandeBlock) {
-                taBortBlock(dragRad, existerandeBlock);
-            } else {
-                läggTillBlock(dragRad, startKol, 1);
-            }
-        } else {
-            // Dra = skapa nytt block
-            läggTillBlock(dragRad, startKol, längd);
-        }
-        
-        ärIDrag = false;
-        dragRad = null;
-        dragStartKol = null;
-        dragSlutKol = null;
-        
-        rensaDragFörhandsvisning();
-        renderaBlock();
-    });
 
     // Visa/dölj track 2-volym
     const volymTrack2Grupp = document.getElementById('volym-track2-grupp');
