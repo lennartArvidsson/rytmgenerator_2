@@ -1,127 +1,162 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="sv">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rytmgenerator</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
 
-  <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rytmgenerator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
     <h1>Rytmgenerator</h1>
 
     <div id="container">
-      <!-- ARBETSYTA -->
-      <main>
-        <!-- Snabba kontroller -->
-        <div id="arbets-kontroller">
-          <div class="kontroll-grupp">
-            <label for="tempo-slider"
-              >Tempo: <span id="tempo-värde">120</span> BPM</label
-            >
-            <input
-              type="range"
-              id="tempo-slider"
-              min="40"
-              max="200"
-              value="120"
-            />
-          </div>
+        <!-- ARBETSYTA -->
+        <main>
+            <!-- Snabba kontroller -->
+            <div id="arbets-kontroller">
+                <div class="kontroll-grupp">
+                    <label for="tempo-slider">Tempo: <span id="tempo-värde">120</span> BPM</label>
+                    <input type="range" id="tempo-slider" min="40" max="200" value="120">
+                </div>
+            </div>
 
-          <div class="kontroll-grupp">
-            <label for="volym-slider"
-              >Volym diskant: <span id="volym-värde">30</span>%</label
-            >
-            <input
-              type="range"
-              id="volym-slider"
-              min="0"
-              max="100"
-              value="30"
-            />
-          </div>
+            <!-- Rytmgrid -->
+            <div id="rytm-grid"></div>
 
-          <div
-            class="kontroll-grupp"
-            id="volym-track2-grupp"
-            style="display: none"
-          >
-            <label for="volym-track2-slider"
-              >Volym bas: <span id="volym-track2-värde">30</span>%</label
-            >
-            <input
-              type="range"
-              id="volym-track2-slider"
-              min="0"
-              max="100"
-              value="30"
-            />
-          </div>
+            <!-- Spelknappar -->
+            <div id="kontroller">
+                <button id="spela">Spela</button>
+                <button id="stopp">Stopp</button>
+                <button id="rensa">Rensa</button>
+            </div>
 
-          <div class="kontroll-grupp">
-            <label for="tonlangd-slider"
-              >Pulstid: <span id="tonlangd-värde">100</span>ms</label
-            >
-            <input
-              type="range"
-              id="tonlangd-slider"
-              min="50"
-              max="500"
-              value="100"
-              step="10"
-            />
-          </div>
-        </div>
+            <!-- Keyboard shortcuts info -->
+            <div id="shortcuts-info">
+                <small>
+                    Tangentbordsgenvägar: 
+                    <strong>Space</strong> = Spela/Stopp • 
+                    <strong>C</strong> = Rensa • 
+                    <strong>←/→</strong> = Tempo
+                </small>
+            </div>
+        </main>
 
-        <!-- Rytmgrid -->
-        <div id="rytm-grid"></div>
+        <!-- INSTÄLLNINGAR ASIDE -->
+        <aside>
+            <h2>Inställningar</h2>
 
-        <!-- Spelknappar -->
-        <div id="kontroller">
-          <button id="spela">Spela</button>
-          <button id="stopp">Stopp</button>
-          <button id="rensa">Rensa</button>
-        </div>
-      </main>
+            <!-- FLIKAR -->
+            <div class="flikar">
+                <button class="flik aktiv" data-flik="grid">Grid</button>
+                <button class="flik" data-flik="ljud">Ljud</button>
+                <button class="flik" data-flik="patterns">Patterns</button>
+            </div>
 
-      <!-- INSTÄLLNINGAR ASIDE -->
-      <aside>
-        <h2>Projektinställningar</h2>
+            <!-- FLIK 1: GRID -->
+            <div class="flik-innehåll aktiv" id="flik-grid">
+                <div class="inställnings-grupp">
+                    <label for="taktart">Taktart:</label>
+                    <select id="taktart">
+                        <option value="4/4">4/4</option>
+                        <option value="3/4">3/4</option>
+                        <option value="6/8">6/8</option>
+                        <option value="2/2">2/2</option>
+                    </select>
+                </div>
 
-        <div class="inställnings-grupp">
-          <label for="taktart">Taktart:</label>
-          <select id="taktart">
-            <option value="4/4">4/4</option>
-            <option value="3/4">3/4</option>
-            <option value="6/8">6/8</option>
-            <option value="2/2">2/2</option>
-          </select>
-        </div>
+                <div class="inställnings-grupp">
+                    <label for="antal-tracks">Antal tracks:</label>
+                    <select id="antal-tracks">
+                        <option value="1">1 (Diskant)</option>
+                        <option value="2">2 (Diskant + Bas)</option>
+                    </select>
+                </div>
 
-        <div class="inställnings-grupp">
-          <label for="antal-tracks">Antal tracks:</label>
-          <select id="antal-tracks">
-            <option value="1">1 (Diskant)</option>
-            <option value="2">2 (Diskant + Bas)</option>
-          </select>
-        </div>
+                <div class="inställnings-grupp">
+                    <label for="minsta-enhet">Minsta enhet:</label>
+                    <select id="minsta-enhet">
+                        <option value="4">1/4-delar (4 per takt)</option>
+                        <option value="8">1/8-delar (8 per takt)</option>
+                        <option value="16" selected>1/16-delar (16 per takt)</option>
+                        <option value="32">1/32-delar (32 per takt)</option>
+                    </select>
+                </div>
 
-        <div class="inställnings-grupp">
-          <label for="minsta-enhet">Minsta enhet:</label>
-          <select id="minsta-enhet">
-            <option value="4">1/4-delar (4 per takt)</option>
-            <option value="8">1/8-delar (8 per takt)</option>
-            <option value="16" selected>1/16-delar (16 per takt)</option>
-            <option value="32">1/32-delar (32 per takt)</option>
-          </select>
-        </div>
+                <div class="inställnings-grupp">
+                    <button id="tillämpa">Tillämpa ändringar</button>
+                </div>
+            </div>
 
-        <div class="inställnings-grupp">
-          <button id="tillämpa">Tillämpa ändringar</button>
-        </div>
-      </aside>
+            <!-- FLIK 2: LJUD -->
+            <div class="flik-innehåll" id="flik-ljud">
+                <div class="inställnings-grupp">
+                    <label>Ljudläge:</label>
+                    <div class="ljudläge-val">
+                        <label>
+                            <input type="radio" name="ljudläge" value="ton">
+                            Ton
+                        </label>
+                        <label>
+                            <input type="radio" name="ljudläge" value="perkussion" checked>
+                            Perkussion
+                        </label>
+                    </div>
+                </div>
+
+                <div class="inställnings-grupp" id="perkussion-inställningar">
+                    <label for="diskant-ljud">Diskant ljud:</label>
+                    <select id="diskant-ljud">
+                        <!-- Fylls dynamiskt med JavaScript -->
+                    </select>
+
+                    <label for="bas-ljud">Bas ljud:</label>
+                    <select id="bas-ljud">
+                        <!-- Fylls dynamiskt med JavaScript -->
+                    </select>
+                </div>
+
+                <div class="inställnings-grupp">
+                    <label for="volym-diskant">Volym diskant: <span id="volym-diskant-värde">30</span>%</label>
+                    <input type="range" id="volym-diskant" min="0" max="100" value="30">
+                </div>
+
+                <div class="inställnings-grupp" id="volym-bas-grupp">
+                    <label for="volym-bas">Volym bas: <span id="volym-bas-värde">30</span>%</label>
+                    <input type="range" id="volym-bas" min="0" max="100" value="30">
+                </div>
+
+                <div class="inställnings-grupp">
+                    <label for="pulstid">Pulstid: <span id="pulstid-värde">100</span>ms</label>
+                    <input type="range" id="pulstid" min="50" max="500" value="100" step="10">
+                </div>
+            </div>
+
+            <!-- FLIK 3: PATTERNS -->
+            <div class="flik-innehåll" id="flik-patterns">
+                <div class="inställnings-grupp">
+                    <h3>Sparade patterns</h3>
+                    
+                    <div class="pattern-input-grupp">
+                        <input type="text" id="pattern-namn" placeholder="Namn på pattern..." maxlength="30">
+                        <button id="spara-pattern" class="pattern-btn">💾 Spara</button>
+                    </div>
+                    
+                    <select id="sparade-patterns" size="6">
+                        <option value="" disabled>-- Inga sparade patterns --</option>
+                    </select>
+                    
+                    <div class="pattern-knappar">
+                        <button id="ladda-pattern" class="pattern-btn">📂 Ladda</button>
+                        <button id="radera-pattern" class="pattern-btn radera-btn">🗑️ Radera</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
     </div>
 
-    <script src="rytm-app.js"></script>
-  </body>
+    <script src="scripts.js"></script>
+</body>
+
 </html>
