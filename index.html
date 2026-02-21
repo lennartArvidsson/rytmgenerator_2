@@ -18,18 +18,29 @@
             <div id="arbets-kontroller">
                 <div class="kontroll-grupp">
                     <label for="tempo-slider">Tempo: <span id="tempo-värde">120</span> BPM</label>
-                    <input type="range" id="tempo-slider" min="40" max="200" value="120">
+                    <div class="tempo-kontroller">
+                        <input type="range" id="tempo-slider" min="40" max="200" value="120">
+                        <input type="number" id="tempo-input" min="40" max="200" value="120">
+                    </div>
                 </div>
             </div>
 
             <!-- Rytmgrid -->
-            <div id="rytm-grid"></div>
+            <div id="mönster-titel-container">
+                <h2 id="mönster-titel">Nytt mönster</h2>
+            </div>
+            
+            <div class="grid-och-knappar-container">
+                <div id="grid-wrapper">
+                    <div id="rytm-grid"></div>
+                </div>
 
-            <!-- Spelknappar -->
-            <div id="kontroller">
-                <button id="spela">Spela</button>
-                <button id="stopp">Stopp</button>
-                <button id="rensa">Rensa</button>
+                <!-- Spelknappar -->
+                <div id="kontroller">
+                    <button id="spela">Spela</button>
+                    <button id="stopp">Stopp</button>
+                    <button id="rensa">Rensa</button>
+                </div>
             </div>
 
             <!-- Keyboard shortcuts info -->
@@ -51,7 +62,7 @@
             <div class="flikar">
                 <button class="flik aktiv" data-flik="grid">Grid</button>
                 <button class="flik" data-flik="ljud">Ljud</button>
-                <button class="flik" data-flik="patterns">Patterns</button>
+                <button class="flik" data-flik="patterns">Mönster</button>
             </div>
 
             <!-- FLIK 1: GRID -->
@@ -86,6 +97,22 @@
 
                 <div class="inställnings-grupp">
                     <button id="tillämpa">Tillämpa ändringar</button>
+                </div>
+
+                <div class="inställnings-grupp">
+                    <h3>Visning</h3>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="visa-mönster-titel" checked>
+                        Visa mönstertitel
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="visa-kvarttoner" checked>
+                        Visa kvarttoner (1, 2, 3, 4)
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="visa-rutnummer">
+                        Visa rutnummer
+                    </label>
                 </div>
             </div>
 
@@ -133,18 +160,18 @@
                 </div>
             </div>
 
-            <!-- FLIK 3: PATTERNS -->
+            <!-- FLIK 3: MÖNSTER -->
             <div class="flik-innehåll" id="flik-patterns">
                 <div class="inställnings-grupp">
-                    <h3>Sparade patterns</h3>
+                    <h3>Sparade mönster</h3>
                     
                     <div class="pattern-input-grupp">
-                        <input type="text" id="pattern-namn" placeholder="Namn på pattern..." maxlength="30">
+                        <input type="text" id="pattern-namn" placeholder="Namn på mönster..." maxlength="30">
                         <button id="spara-pattern" class="pattern-btn">💾 Spara</button>
                     </div>
                     
                     <select id="sparade-patterns" size="6">
-                        <option value="" disabled>-- Inga sparade patterns --</option>
+                        <option value="" disabled>-- Inga sparade mönster --</option>
                     </select>
                     
                     <div class="pattern-knappar">

@@ -132,7 +132,6 @@ function läggTillBlock(rad, start, längd) {
 // ==============================================
 
 // Globala variabler
-const grid = document.getElementById("rytm-grid");
 let rutor = [];
 let spelareInterval = null;
 let nuvarandeRuta = 0;
@@ -143,6 +142,11 @@ let ärIDrag = false;
 let dragRad = null;
 let dragStartKol = null;
 let dragSlutKol = null;
+
+// Mönster-spårning (NYT)
+let nuvarandeMönster = null; // Namnet på laddat mönster, eller null
+let harÄndringar = false; // Har användaren ändrat sedan senaste spara/ladda?
+let senasteSparadeTillstånd = null; // För att jämföra ändringar
 
 // ============ FLIK-HANTERING (NYT) ============
 
@@ -164,21 +168,121 @@ function växlaFlik(flikNamn) {
 
 // ==============================================
 
-// ============ PATTERN-HANTERING (NYT) ============
+// ============ ÄNDRINGS-SPÅRNING (NYT) ============
+
+function sparaTillstånd() {
+  // Spara nuvarande tillstånd för jämförelse
+  senasteSparadeTillstånd = JSON.stringify({
+    blockData: blockData,
+    config: {
+      antalRutor: config.antalRutor,
+      antalRader: config.antalRader,
+      taktart: config.taktart,
+      minstaEnhet: config.minstaEnhet,
+      tempo: config.tempo,
+    },
+    ljud: {
+      diskant: valdDiskantLjud,
+      bas: valdBasLjud,
+    },
+  });
+  harÄndringar = false;
+}
+
+function kollaNuvarandeTillstånd() {
+  const nuvarandeTillstånd = JSON.stringify({
+    blockData: blockData,
+    config: {
+      antalRutor: config.antalRutor,
+      antalRader: config.antalRader,
+      taktart: config.taktart,
+      minstaEnhet: config.minstaEnhet,
+      tempo: config.tempo,
+    },
+    ljud: {
+      diskant: valdDiskantLjud,
+      bas: valdBasLjud,
+    },
+  });
+
+  return nuvarandeTillstånd !== senasteSparadeTillstånd;
+}
+
+function markeraÄndring() {
+  harÄndringar = true;
+}
+
+function frågaOmSparaÄndringar() {
+  if (!harÄndringar || !nuvarandeMönster) return true;
+
+  const svar = confirm(
+    `Du har osparade ändringar i "${nuvarandeMönster}". Vill du spara innan du fortsätter?`,
+  );
+
+  if (svar) {
+    // Spara automatiskt till nuvarande mönster
+    sparaTillNuvarandeMönster();
+  }
+
+  return true;
+}
+
+function sparaTillNuvarandeMönster() {
+  if (!nuvarandeMönster) return;
+
+  const patterns = hämtaAllaPatterns();
+
+  patterns[nuvarandeMönster] = {
+    namn: nuvarandeMönster,
+    blockData: JSON.parse(JSON.stringify(blockData)),
+    config: {
+      antalRutor: config.antalRutor,
+      antalRader: config.antalRader,
+      taktart: config.taktart,
+      minstaEnhet: config.minstaEnhet,
+      tempo: config.tempo,
+    },
+    ljud: {
+      diskant: valdDiskantLjud,
+      bas: valdBasLjud,
+    },
+    sparadDatum: new Date().toISOString(),
+  };
+
+  localStorage.setItem("sparadePatterns", JSON.stringify(patterns));
+  sparaTillstånd();
+  console.log("Sparade ändringar till:", nuvarandeMönster);
+}
+
+// ==============================================
+
+// ============ MÖNSTER-HANTERING (NYT) ============
 
 function sparaPattern() {
   const namnInput = document.getElementById("pattern-namn");
-  const namn = namnInput.value.trim();
+  let namn = namnInput.value.trim();
+
+  // Om inget namn angivet men vi har ett laddat mönster, spara till det
+  if (!namn && nuvarandeMönster) {
+    namn = nuvarandeMönster;
+  }
 
   if (!namn) {
-    alert("Ange ett namn för pattern!");
+    alert("Ange ett namn för mönstret!");
     return;
   }
 
-  // Hämta befintliga patterns
+  // Hämta befintliga mönster
   const patterns = hämtaAllaPatterns();
 
-  // Skapa pattern-objekt
+  // Om mönstret redan finns, fråga om överskrivning
+  if (patterns[namn] && namn !== nuvarandeMönster) {
+    if (!confirm(`Mönstret "${namn}" finns redan. Vill du skriva över det?`)) {
+      return;
+    }
+  }
+
+  // Skapa mönster-objekt
   const pattern = {
     namn: namn,
     blockData: JSON.parse(JSON.stringify(blockData)), // Deep copy
@@ -196,15 +300,25 @@ function sparaPattern() {
     sparadDatum: new Date().toISOString(),
   };
 
-  // Spara pattern
+  // Spara mönster
   patterns[namn] = pattern;
   localStorage.setItem("sparadePatterns", JSON.stringify(patterns));
+
+  // Uppdatera tillstånd
+  nuvarandeMönster = namn;
+  sparaTillstånd();
+
+  // Uppdatera mönstertitel
+  uppdateraMönsterTitel();
 
   // Uppdatera UI
   uppdateraPatternLista();
   namnInput.value = "";
 
-  console.log("Sparade pattern:", namn);
+  // Välj det sparade mönstret i listan
+  document.getElementById("sparade-patterns").value = namn;
+
+  console.log("Sparade mönster:", namn);
 }
 
 function laddaPattern() {
@@ -212,7 +326,12 @@ function laddaPattern() {
   const valdNamn = select.value;
 
   if (!valdNamn) {
-    alert("Välj ett pattern att ladda!");
+    alert("Välj ett mönster att ladda!");
+    return;
+  }
+
+  // Kolla om det finns osparade ändringar
+  if (!frågaOmSparaÄndringar()) {
     return;
   }
 
@@ -220,7 +339,7 @@ function laddaPattern() {
   const pattern = patterns[valdNamn];
 
   if (!pattern) {
-    alert("Pattern hittades inte!");
+    alert("Mönster hittades inte!");
     return;
   }
 
@@ -244,6 +363,7 @@ function laddaPattern() {
 
   // Uppdatera UI-element
   document.getElementById("tempo-slider").value = config.tempo;
+  document.getElementById("tempo-input").value = config.tempo;
   document.getElementById("tempo-värde").textContent = config.tempo;
   document.getElementById("taktart").value = config.taktart;
   document.getElementById("antal-tracks").value = config.antalRader;
@@ -252,10 +372,17 @@ function laddaPattern() {
   // Ladda blockdata
   blockData = JSON.parse(JSON.stringify(pattern.blockData)); // Deep copy
 
+  // Sätt nuvarande mönster
+  nuvarandeMönster = valdNamn;
+  sparaTillstånd();
+
+  // Uppdatera mönstertitel
+  uppdateraMönsterTitel();
+
   // Återskapa gridet
   skapaGrid();
 
-  console.log("Laddade pattern:", valdNamn);
+  console.log("Laddade mönster:", valdNamn);
 }
 
 function raderaPattern() {
@@ -263,7 +390,7 @@ function raderaPattern() {
   const valdNamn = select.value;
 
   if (!valdNamn) {
-    alert("Välj ett pattern att radera!");
+    alert("Välj ett mönster att radera!");
     return;
   }
 
@@ -277,7 +404,7 @@ function raderaPattern() {
 
   uppdateraPatternLista();
 
-  console.log("Raderade pattern:", valdNamn);
+  console.log("Raderade mönster:", valdNamn);
 }
 
 function hämtaAllaPatterns() {
@@ -297,7 +424,7 @@ function uppdateraPatternLista() {
     const option = document.createElement("option");
     option.value = "";
     option.disabled = true;
-    option.textContent = "-- Inga sparade patterns --";
+    option.textContent = "-- Inga sparade mönster --";
     select.appendChild(option);
   } else {
     namn.forEach((n) => {
@@ -396,6 +523,7 @@ function laddaState() {
 
     // Uppdatera UI-element
     document.getElementById("tempo-slider").value = config.tempo;
+    document.getElementById("tempo-input").value = config.tempo;
     document.getElementById("tempo-värde").textContent = config.tempo;
 
     document.getElementById("volym-diskant").value = Math.round(
@@ -440,6 +568,9 @@ function laddaState() {
     while (blockData.length < 2) blockData.push([]);
     console.log("Laddade sparade block");
   }
+
+  // Spara initialt tillstånd
+  sparaTillstånd();
 }
 
 function renderaBlock() {
@@ -498,12 +629,23 @@ function beräknaAntalRutor(taktart, minstaEnhet) {
 
 // Funktion för att skapa/återskapa gridet
 function skapaGrid() {
+  const gridWrapper = document.getElementById("grid-wrapper");
+  const grid = document.getElementById("rytm-grid");
   grid.innerHTML = "";
+
+  // Ta bort gamla linjer
+  gridWrapper
+    .querySelectorAll(".kvartton-linje, .rad-separator-linje")
+    .forEach((l) => l.remove());
+
   rutor = [];
 
   // Uppdatera grid-layout
   grid.style.gridTemplateColumns = `repeat(${config.antalRutor}, ${config.rutStorlek}px)`;
   grid.style.gridTemplateRows = `repeat(${config.antalRader}, ${config.rutStorlek}px)`;
+
+  // Skapa kvarttoner-rad (ovanför grid)
+  skapaKvarttonerRad();
 
   // Skapa rutor för varje rad
   for (let rad = 0; rad < config.antalRader; rad++) {
@@ -550,6 +692,12 @@ function skapaGrid() {
     }
   }
 
+  // Skapa separator-linjer
+  skapaSeparatorLinjer();
+
+  // Skapa rutnummer-rad (under grid)
+  skapaRutnummerRad();
+
   // Mouseup - avsluta drag
   document.addEventListener("mouseup", function (e) {
     if (!ärIDrag) return;
@@ -578,6 +726,7 @@ function skapaGrid() {
 
     rensaDragFörhandsvisning();
     renderaBlock();
+    markeraÄndring(); // NYT - Markera att grid har ändrats
   });
 
   // Visa/dölj bas-volym
@@ -611,6 +760,142 @@ function rensaDragFörhandsvisning() {
       ruta.classList.remove("drag-förhandsvisning");
     }),
   );
+}
+
+// Skapa kvarttoner-rad (NYT)
+function skapaKvarttonerRad() {
+  // Ta bort befintlig rad om den finns
+  const befintlig = document.getElementById("kvarttoner-rad");
+  if (befintlig) befintlig.remove();
+
+  const kvarttonerRad = document.createElement("div");
+  kvarttonerRad.id = "kvarttoner-rad";
+
+  // Visa/dölj baserat på checkbox
+  const visaKvarttoner = document.getElementById("visa-kvarttoner").checked;
+  if (!visaKvarttoner) {
+    kvarttonerRad.classList.add("dold");
+  }
+
+  const rutorPerKvartton = config.minstaEnhet / 4;
+  const antalKvarttoner = Math.floor(config.antalRutor / rutorPerKvartton);
+
+  const gridWrapper = document.getElementById("grid-wrapper");
+
+  for (let i = 0; i < antalKvarttoner; i++) {
+    const kvartton = document.createElement("div");
+    kvartton.className = "kvartton";
+    kvartton.textContent = i + 1;
+
+    // Position: centrerad över FÖRSTA rutan i varje kvarttonsgrupp
+    const gruppStart = i * rutorPerKvartton;
+    const position =
+      gruppStart * config.rutStorlek +
+      gruppStart * config.gap +
+      config.rutStorlek / 2;
+
+    kvartton.style.left = position + "px";
+    kvartton.style.transform = "translateX(-50%)";
+
+    kvarttonerRad.appendChild(kvartton);
+  }
+
+  gridWrapper.insertBefore(kvarttonerRad, gridWrapper.firstChild);
+}
+
+// Skapa separator-linjer (NYT)
+function skapaSeparatorLinjer() {
+  const gridWrapper = document.getElementById("grid-wrapper");
+  const grid = document.getElementById("rytm-grid");
+
+  const rutorPerKvartton = config.minstaEnhet / 4;
+  const antalKvarttoner = Math.floor(config.antalRutor / rutorPerKvartton);
+
+  const gridHöjd =
+    config.antalRader * config.rutStorlek +
+    (config.antalRader - 1) * config.gap;
+
+  // Skapa vertikala linjer för kvarttoner (mellan grupperna)
+  for (let i = 1; i < antalKvarttoner; i++) {
+    const linje = document.createElement("div");
+    linje.className = "kvartton-linje";
+
+    // Position: efter sista rutan i gruppen, mitt i gapet
+    const position =
+      i * rutorPerKvartton * config.rutStorlek +
+      (i * rutorPerKvartton - 1) * config.gap +
+      config.gap / 2 -
+      1.5;
+
+    linje.style.left = position + "px";
+    linje.style.height = gridHöjd + "px";
+
+    grid.appendChild(linje);
+  }
+
+  // Skapa horisontell linje mellan bas och diskant
+  if (config.antalRader === 2) {
+    const linje = document.createElement("div");
+    linje.className = "rad-separator-linje";
+
+    // Position: efter första raden, mitt i gapet
+    const position = config.rutStorlek + config.gap / 2 - 1.5;
+    const gridBredd =
+      config.antalRutor * config.rutStorlek +
+      (config.antalRutor - 1) * config.gap;
+
+    linje.style.top = position + "px";
+    linje.style.width = gridBredd + "px";
+
+    grid.appendChild(linje);
+  }
+}
+
+// Skapa rutnummer-rad (NYT)
+function skapaRutnummerRad() {
+  // Ta bort befintlig rad om den finns
+  const befintlig = document.getElementById("rutnummer-rad");
+  if (befintlig) befintlig.remove();
+
+  const rutnummerRad = document.createElement("div");
+  rutnummerRad.id = "rutnummer-rad";
+
+  // Visa/dölj baserat på checkbox
+  const visaRutnummer = document.getElementById("visa-rutnummer").checked;
+  if (!visaRutnummer) {
+    rutnummerRad.classList.add("dold");
+  }
+
+  const gridWrapper = document.getElementById("grid-wrapper");
+
+  for (let i = 0; i < config.antalRutor; i++) {
+    const nummer = document.createElement("div");
+    nummer.className = "rutnummer";
+    nummer.textContent = i + 1;
+
+    // Position: centrum av varje ruta
+    const position =
+      i * config.rutStorlek + i * config.gap + config.rutStorlek / 2;
+    nummer.style.left = position + "px";
+    nummer.style.transform = "translateX(-50%)";
+
+    rutnummerRad.appendChild(nummer);
+  }
+
+  gridWrapper.appendChild(rutnummerRad);
+}
+
+// Uppdatera mönstertitel (NYT)
+function uppdateraMönsterTitel() {
+  const titel = document.getElementById("mönster-titel");
+  const visaTitel = document.getElementById("visa-mönster-titel").checked;
+
+  if (visaTitel) {
+    titel.classList.remove("dold");
+    titel.textContent = nuvarandeMönster || "Nytt mönster";
+  } else {
+    titel.classList.add("dold");
+  }
 }
 
 // Ljud-funktion med diskant/bas - nu med dynamisk tonlängd och perkussion
@@ -728,13 +1013,24 @@ document.querySelectorAll(".flik").forEach((flik) => {
 // Ljudval (NYT)
 document.getElementById("diskant-ljud").addEventListener("change", function () {
   valdDiskantLjud = this.value;
+  markeraÄndring();
   console.log("Valde diskant-ljud:", valdDiskantLjud);
 });
 
 document.getElementById("bas-ljud").addEventListener("change", function () {
   valdBasLjud = this.value;
+  markeraÄndring();
   console.log("Valde bas-ljud:", valdBasLjud);
 });
+
+// Dubbelklick på mönsterlista laddar mönster (NYT)
+document
+  .getElementById("sparade-patterns")
+  .addEventListener("dblclick", function () {
+    if (this.value) {
+      laddaPattern();
+    }
+  });
 
 // Spelknappar
 document.getElementById("spela").addEventListener("click", function () {
@@ -746,7 +1042,15 @@ document.getElementById("spela").addEventListener("click", function () {
 document.getElementById("stopp").addEventListener("click", stoppaSpelaer);
 
 document.getElementById("rensa").addEventListener("click", function () {
+  // Kolla om det finns osparade ändringar
+  if (!frågaOmSparaÄndringar()) {
+    return;
+  }
+
   blockData = [[], []];
+  nuvarandeMönster = null;
+  sparaTillstånd();
+  uppdateraMönsterTitel();
   renderaBlock();
 });
 
@@ -761,19 +1065,73 @@ document
   .getElementById("radera-pattern")
   .addEventListener("click", raderaPattern);
 
-// Tempo slider
+// Tempo slider och input
 const tempoSlider = document.getElementById("tempo-slider");
+const tempoInput = document.getElementById("tempo-input");
 const tempoVärde = document.getElementById("tempo-värde");
 
 tempoSlider.addEventListener("input", function () {
   config.tempo = parseInt(this.value);
   tempoVärde.textContent = config.tempo;
+  tempoInput.value = config.tempo;
+  markeraÄndring();
 
   if (spelareInterval !== null) {
     clearInterval(spelareInterval);
     spelareInterval = setInterval(spelaSteg, config.intervall);
   }
 });
+
+tempoInput.addEventListener("input", function () {
+  let värde = parseInt(this.value);
+  if (värde < 40) värde = 40;
+  if (värde > 200) värde = 200;
+  if (isNaN(värde)) return;
+
+  config.tempo = värde;
+  tempoVärde.textContent = värde;
+  tempoSlider.value = värde;
+  markeraÄndring();
+
+  if (spelareInterval !== null) {
+    clearInterval(spelareInterval);
+    spelareInterval = setInterval(spelaSteg, config.intervall);
+  }
+});
+
+// Markera text när BPM-input får fokus (NYT)
+tempoInput.addEventListener("focus", function () {
+  this.select();
+});
+
+// Visnings-checkboxar (NYT)
+document
+  .getElementById("visa-mönster-titel")
+  .addEventListener("change", function () {
+    uppdateraMönsterTitel();
+  });
+
+document
+  .getElementById("visa-kvarttoner")
+  .addEventListener("change", function () {
+    const kvarttonerRad = document.getElementById("kvarttoner-rad");
+    if (this.checked) {
+      kvarttonerRad.classList.remove("dold");
+    } else {
+      kvarttonerRad.classList.add("dold");
+    }
+  });
+
+document
+  .getElementById("visa-rutnummer")
+  .addEventListener("change", function () {
+    const rutnummerRad = document.getElementById("rutnummer-rad");
+    if (this.checked) {
+      rutnummerRad.classList.remove("dold");
+    } else {
+      rutnummerRad.classList.add("dold");
+    }
+  });
 
 // Volym slider (diskant/track 1)
 const volymDiskantSlider = document.getElementById("volym-diskant");
@@ -815,6 +1173,11 @@ document.querySelectorAll('input[name="ljudläge"]').forEach((radio) => {
 
 // Aside-inställningar - Tillämpa-knappen
 document.getElementById("tillämpa").addEventListener("click", function () {
+  // Kolla om det finns osparade ändringar
+  if (!frågaOmSparaÄndringar()) {
+    return;
+  }
+
   stoppaSpelaer();
 
   config.taktart = document.getElementById("taktart").value;
@@ -825,6 +1188,8 @@ document.getElementById("tillämpa").addEventListener("click", function () {
 
   // Rensa blockdata vid ändring av grid-storlek
   blockData = [[], []];
+  nuvarandeMönster = null;
+  sparaTillstånd();
 
   skapaGrid();
 });
@@ -834,3 +1199,4 @@ laddaState(); // Ladda sparade inställningar först
 laddaSamples(); // Ladda ljudsamples
 skapaGrid(); // Sedan skapa gridet (som även laddar rytmmönstret)
 uppdateraPatternLista(); // Ladda sparade patterns (NYT)
+uppdateraMönsterTitel(); // Uppdatera mönstertitel (NYT)
