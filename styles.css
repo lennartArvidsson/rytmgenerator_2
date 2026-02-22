@@ -1,482 +1,482 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    padding: 0;
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  padding: 0;
 }
 
 h1 {
-    text-align: center;
-    margin-bottom: 20px;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 #container {
-    display: flex;
-    gap: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
+  display: flex;
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* ARBETSYTA */
 main {
-    flex: 1;
+  flex: 1;
 }
 
 #mönster-titel-container {
-    text-align: center;
-    margin-bottom: 5px;
-    min-height: 30px;
+  text-align: center;
+  margin-bottom: 5px;
+  min-height: 30px;
 }
 
 #mönster-titel {
-    font-size: 20px;
-    color: #333;
-    margin: 0;
-    font-weight: normal;
+  font-size: 20px;
+  color: #333;
+  margin: 0;
+  font-weight: normal;
 }
 
 #mönster-titel.dold {
-    display: none;
+  display: none;
 }
 
 /* Grid wrapper - centrerad */
 #grid-wrapper {
-    position: relative;
-    display: inline-block;
+  position: relative;
+  display: inline-block;
 }
 
 #arbets-kontroller {
-    background-color: #f5f5f5;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
+  background-color: #f5f5f5;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
 }
 
 .kontroll-grupp {
-    margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
 .kontroll-grupp:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .kontroll-grupp label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 14px;
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
 }
 
 .kontroll-grupp input[type="range"] {
-    width: 100%;
+  width: 100%;
 }
 
 .tempo-kontroller {
-    display: flex;
-    gap: 10px;
-    align-items: center;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .tempo-kontroller input[type="range"] {
-    flex: 1;
+  flex: 1;
 }
 
 .tempo-kontroller input[type="number"] {
-    width: 60px;
-    padding: 5px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    text-align: center;
+  width: 60px;
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
 }
 
 .ljudläge-val {
-    display: flex;
-    gap: 15px;
+  display: flex;
+  gap: 15px;
 }
 
 .ljudläge-val label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-    font-weight: normal;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  font-weight: normal;
 }
 
 /* Grid och knappars container */
 .grid-och-knappar-container {
-    text-align: center;
+  text-align: center;
 }
 
 #rytm-grid {
-    display: grid;
-    grid-template-columns: repeat(16, 40px);
-    gap: 5px;
-    margin: 20px 0;
-    position: relative;
+  display: grid;
+  grid-template-columns: repeat(16, 40px);
+  gap: 5px;
+  margin: 20px 0;
+  position: relative;
 }
 
 /* Grid container wrapper för att innehålla linjer */
 #grid-wrapper {
-    position: relative;
-    display: inline-block;
-    text-align: left;
+  position: relative;
+  display: inline-block;
+  text-align: left;
 }
 
 /* Kvarttonsmarkeringar */
 #kvarttoner-rad {
-    position: absolute;
-    top: -18px;
-    left: 0;
-    width: 100%;
-    display: flex;
-    pointer-events: none;
+  position: absolute;
+  top: 0px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  pointer-events: none;
 }
 
 #kvarttoner-rad.dold {
-    display: none;
+  display: none;
 }
 
 .kvartton {
-    font-weight: bold;
-    font-size: 16px;
-    color: #333;
-    text-align: center;
-    position: absolute;
+  font-weight: bold;
+  font-size: 16px;
+  color: #333;
+  text-align: center;
+  position: absolute;
 }
 
 /* Vertikala separator-linjer */
 .kvartton-linje {
-    position: absolute;
-    width: 3px;
-    background-color: #666;
-    border-radius: 2px;
-    top: 0;
-    pointer-events: none;
-    z-index: 1;
+  position: absolute;
+  width: 3px;
+  background-color: #666;
+  border-radius: 2px;
+  top: 0;
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* Horisontell separator mellan bas och diskant */
 .rad-separator-linje {
-    position: absolute;
-    height: 3px;
-    background-color: #666;
-    border-radius: 2px;
-    left: 0;
-    pointer-events: none;
-    z-index: 1;
+  position: absolute;
+  height: 3px;
+  background-color: #666;
+  border-radius: 2px;
+  left: 0;
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* Rutnummer */
 #rutnummer-rad {
-    position: absolute;
-    bottom: -14px;
-    left: 0;
-    width: 100%;
-    display: flex;
-    pointer-events: none;
+  position: absolute;
+  bottom: 18px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  pointer-events: none;
 }
 
 #rutnummer-rad.dold {
-    display: none;
+  display: none;
 }
 
 .rutnummer {
-    font-size: 11px;
-    color: #999;
-    text-align: center;
-    font-weight: 300;
-    position: absolute;
+  font-size: 11px;
+  color: #999;
+  text-align: center;
+  font-weight: 300;
+  position: absolute;
 }
 
 .ruta {
-    width: 40px;
-    height: 40px;
-    background-color: #bbb;
-    border: 1px solid #999;
-    cursor: pointer;
-    user-select: none;
-    border-radius: 4px;
-    position: relative;
-    box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  background-color: #bbb;
+  border: 1px solid #999;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 4px;
+  position: relative;
+  box-sizing: border-box;
 }
 
 .ruta.spelar {
-    background-color: #e0e0e0;
+  background-color: #e0e0e0;
 }
 
 .ruta.aktiv {
-    background-color: #4CAF50;
-    border-color: #388E3C;
+  background-color: #4caf50;
+  border-color: #388e3c;
 }
 
 .ruta.aktiv.spelar {
-    background-color: #8FD694;
+  background-color: #8fd694;
 }
 
 /* Block-styling - skapa visuell sammanslagning med utsträckt bakgrund */
 .ruta.aktiv.block-start {
-    border-radius: 4px 0 0 4px;
-    border-right: none;
+  border-radius: 4px 0 0 4px;
+  border-right: none;
 }
 
 /* Förläng bakgrunden åt höger för att täcka gapet */
 .ruta.aktiv.block-start::after,
 .ruta.aktiv.block-mitt::after {
-    content: '';
-    position: absolute;
-    top: -1px;
-    right: -6px;
-    width: 7px;
-    height: calc(100% + 2px);
-    background-color: #4CAF50;
-    z-index: 0;
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: -6px;
+  width: 7px;
+  height: calc(100% + 2px);
+  background-color: #4caf50;
+  z-index: 0;
 }
 
 .ruta.aktiv.block-start.spelar::after,
 .ruta.aktiv.block-mitt.spelar::after {
-    background-color: #8FD694;
+  background-color: #8fd694;
 }
 
 .ruta.aktiv.block-mitt {
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
 }
 
 .ruta.aktiv.block-slut {
-    border-radius: 0 4px 4px 0;
-    border-left: none;
+  border-radius: 0 4px 4px 0;
+  border-left: none;
 }
 
 .ruta.aktiv.block-ensam {
-    border-radius: 4px;
+  border-radius: 4px;
 }
 
 /* Drag-förhandsvisning */
 .ruta.drag-förhandsvisning {
-    background-color: #81C784;
-    opacity: 0.8;
+  background-color: #81c784;
+  opacity: 0.8;
 }
 
 #kontroller {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 15px;
 }
 
 button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    border-radius: 4px;
-    background-color: #2196F3;
-    color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  background-color: #2196f3;
+  color: white;
 }
 
 button:hover {
-    background-color: #0b7dda;
+  background-color: #0b7dda;
 }
 
 #rensa {
-    background-color: #f44336;
+  background-color: #f44336;
 }
 
 #rensa:hover {
-    background-color: #da190b;
+  background-color: #da190b;
 }
 
 /* Shortcuts info */
 #shortcuts-info {
-    text-align: center;
-    margin-top: 15px;
-    color: #666;
+  text-align: center;
+  margin-top: 15px;
+  color: #666;
 }
 
 #shortcuts-info strong {
-    color: #333;
-    background-color: #e8e8e8;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-family: monospace;
+  color: #333;
+  background-color: #e8e8e8;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: monospace;
 }
 
 /* ASIDE - INSTÄLLNINGAR */
 aside {
-    width: 280px;
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
+  width: 280px;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
 }
 
 aside h2 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 18px;
-    border-bottom: 2px solid #ddd;
-    padding-bottom: 10px;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 18px;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 10px;
 }
 
 aside h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 16px;
-    color: #333;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #333;
 }
 
 /* FLIKAR */
 .flikar {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 20px;
+  display: flex;
+  gap: 5px;
+  margin-bottom: 20px;
 }
 
 .flik {
-    flex: 1;
-    padding: 10px;
-    font-size: 14px;
-    background-color: #e0e0e0;
-    color: #666;
-    border: none;
-    border-radius: 4px 4px 0 0;
-    cursor: pointer;
-    transition: all 0.2s;
+  flex: 1;
+  padding: 10px;
+  font-size: 14px;
+  background-color: #e0e0e0;
+  color: #666;
+  border: none;
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .flik:hover {
-    background-color: #d0d0d0;
+  background-color: #d0d0d0;
 }
 
 .flik.aktiv {
-    background-color: #2196F3;
-    color: white;
+  background-color: #2196f3;
+  color: white;
 }
 
 .flik-innehåll {
-    display: none;
+  display: none;
 }
 
 .flik-innehåll.aktiv {
-    display: block;
+  display: block;
 }
 
 .inställnings-grupp {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .inställnings-grupp label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    font-size: 14px;
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  font-size: 14px;
 }
 
 .inställnings-grupp select {
-    width: 100%;
-    padding: 8px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .checkbox-label {
-    display: flex !important;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    font-weight: normal !important;
-    cursor: pointer;
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-weight: normal !important;
+  cursor: pointer;
 }
 
 .checkbox-label input[type="checkbox"] {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 #tillämpa {
-    width: 100%;
-    background-color: #4CAF50;
+  width: 100%;
+  background-color: #4caf50;
 }
 
 #tillämpa:hover {
-    background-color: #45a049;
+  background-color: #45a049;
 }
 
 /* Pattern-hantering styling */
 .pattern-input-grupp {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 10px;
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
 }
 
 #pattern-namn {
-    flex: 1;
-    padding: 8px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  flex: 1;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 #pattern-namn:focus {
-    outline: none;
-    border-color: #2196F3;
+  outline: none;
+  border-color: #2196f3;
 }
 
 #sparade-patterns {
-    width: 100%;
-    padding: 5px;
-    font-size: 13px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    background-color: white;
+  width: 100%;
+  padding: 5px;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  background-color: white;
 }
 
 #sparade-patterns option {
-    padding: 5px;
+  padding: 5px;
 }
 
 #sparade-patterns option:disabled {
-    text-align: center;
-    color: #999;
-    font-style: italic;
+  text-align: center;
+  color: #999;
+  font-style: italic;
 }
 
 .pattern-knappar {
-    display: flex;
-    gap: 5px;
+  display: flex;
+  gap: 5px;
 }
 
 .pattern-btn {
-    flex: 1;
-    padding: 8px 12px;
-    font-size: 14px;
-    background-color: #2196F3;
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 14px;
+  background-color: #2196f3;
 }
 
 .pattern-btn:hover {
-    background-color: #0b7dda;
+  background-color: #0b7dda;
 }
 
 #spara-pattern {
-    background-color: #4CAF50;
+  background-color: #4caf50;
 }
 
 #spara-pattern:hover {
-    background-color: #45a049;
+  background-color: #45a049;
 }
 
 .radera-btn {
-    background-color: #f44336;
+  background-color: #f44336;
 }
 
 .radera-btn:hover {
-    background-color: #da190b;
+  background-color: #da190b;
 }
 
 /* Disabled state för pattern-knappar */
 .pattern-btn:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-    opacity: 0.6;
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
