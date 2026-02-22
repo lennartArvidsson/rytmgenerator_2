@@ -124,7 +124,7 @@ main {
 /* Kvarttonsmarkeringar */
 #kvarttoner-rad {
     position: absolute;
-    top: -20px;
+    top: -18px;
     left: 0;
     width: 100%;
     display: flex;
@@ -168,7 +168,7 @@ main {
 /* Rutnummer */
 #rutnummer-rad {
     position: absolute;
-    bottom: -16px;
+    bottom: -14px;
     left: 0;
     width: 100%;
     display: flex;
