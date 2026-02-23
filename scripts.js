@@ -60,7 +60,7 @@ async function laddaSamples() {
   // Ladda alla tillgängliga ljudfiler
   for (const ljudnamn of tillgängligaLjud) {
     try {
-      const response = await fetch(`audio/${ljudnamn}.wav`);
+      const response = await fetch(`Audio/${ljudnamn}.wav`);
       const buffer = await response.arrayBuffer();
       samples.ljudfiler[ljudnamn] = await audioContext.decodeAudioData(buffer);
       console.log(`Laddade ${ljudnamn}`);
