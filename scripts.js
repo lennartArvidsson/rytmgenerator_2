@@ -30,7 +30,7 @@ const config = {
     aktiv: "#4CAF50",
     aktivSpelar: "#8FD694",
   },
-  
+
   // Visning (NYT)
   visaMönsterTitel: true,
   visaKvarttoner: true,
@@ -145,10 +145,10 @@ const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 // iOS ljudfix - AudioContext måste startas av user interaction
 let audioContextStartad = false;
 function startaAudioContext() {
-  if (!audioContextStartad && audioContext.state === 'suspended') {
+  if (!audioContextStartad && audioContext.state === "suspended") {
     audioContext.resume().then(() => {
       audioContextStartad = true;
-      console.log('AudioContext startad för iOS');
+      console.log("AudioContext startad för iOS");
     });
   }
 }
@@ -575,11 +575,14 @@ function laddaState() {
       `input[name="ljudläge"][value="${config.ljudläge}"]`,
     );
     if (ljudlägeRadio) ljudlägeRadio.checked = true;
-    
+
     // Checkboxar för visning (NYT)
-    document.getElementById("visa-mönster-titel").checked = config.visaMönsterTitel !== false;
-    document.getElementById("visa-kvarttoner").checked = config.visaKvarttoner !== false;
-    document.getElementById("visa-rutnummer").checked = config.visaRutnummer === true;
+    document.getElementById("visa-mönster-titel").checked =
+      config.visaMönsterTitel !== false;
+    document.getElementById("visa-kvarttoner").checked =
+      config.visaKvarttoner !== false;
+    document.getElementById("visa-rutnummer").checked =
+      config.visaRutnummer === true;
 
     console.log("Laddade sparade inställningar");
   }
@@ -651,6 +654,45 @@ function beräknaAntalRutor(taktart, minstaEnhet) {
   return täljare * (minstaEnhet / nämnare);
 }
 
+// ============ DRAG-HANTERING (gemensam för mouse och touch) ============
+
+function avslutaDrag() {
+  if (!ärIDrag) return;
+
+  const startKol = Math.min(dragStartKol, dragSlutKol);
+  const slutKol = Math.max(dragStartKol, dragSlutKol);
+  const längd = slutKol - startKol + 1;
+
+  // Kolla om vi klickar på ett existerande block (för att ta bort det)
+  if (längd === 1) {
+    const existerandeBlock = hittaBlock(dragRad, startKol);
+    if (existerandeBlock) {
+      taBortBlock(dragRad, existerandeBlock);
+    } else {
+      läggTillBlock(dragRad, startKol, 1);
+    }
+  } else {
+    // Dra = skapa nytt block
+    läggTillBlock(dragRad, startKol, längd);
+  }
+
+  ärIDrag = false;
+  dragRad = null;
+  dragStartKol = null;
+  dragSlutKol = null;
+
+  rensaDragFörhandsvisning();
+  renderaBlock();
+  markeraÄndring();
+}
+
+// Globala event listeners för att avsluta drag
+document.addEventListener("mouseup", avslutaDrag);
+document.addEventListener("touchend", avslutaDrag);
+document.addEventListener("touchcancel", avslutaDrag);
+
+// =========================================================================
+
 // Funktion för att skapa/återskapa gridet
 function skapaGrid() {
   const gridWrapper = document.getElementById("grid-wrapper");
@@ -681,7 +723,7 @@ function skapaGrid() {
       ruta.dataset.rad = rad;
       ruta.dataset.kol = kol;
 
-      // Mousedown - starta drag eller klick
+      // ============ MOUSE EVENTS ============
       ruta.addEventListener("mousedown", function (e) {
         if (e.button !== 0) return; // Endast vänsterklick
         e.preventDefault();
@@ -697,61 +739,63 @@ function skapaGrid() {
         visaDragFörhandsvisning();
       });
 
-      // Mouseover - uppdatera drag
       ruta.addEventListener("mouseover", function () {
         if (!ärIDrag) return;
 
         const r = parseInt(this.dataset.rad);
         const k = parseInt(this.dataset.kol);
 
-        // Endast samma rad
         if (r === dragRad) {
           dragSlutKol = k;
           visaDragFörhandsvisning();
         }
       });
 
+      // ============ TOUCH EVENTS (för iPad/iPhone) ============
+      ruta.addEventListener("touchstart", function (e) {
+        e.preventDefault();
+        startaAudioContext(); // iOS ljudfix
+
+        const r = parseInt(this.dataset.rad);
+        const k = parseInt(this.dataset.kol);
+
+        ärIDrag = true;
+        dragRad = r;
+        dragStartKol = k;
+        dragSlutKol = k;
+
+        visaDragFörhandsvisning();
+      }, { passive: false });
+
       grid.appendChild(ruta);
       rutor[rad].push(ruta);
     }
   }
+
+  // ============ TOUCH MOVE på grid-nivå (krävs för iOS) ============
+  grid.addEventListener("touchmove", function (e) {
+    if (!ärIDrag) return;
+    e.preventDefault();
+
+    const touch = e.touches[0];
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+
+    if (element && element.classList.contains("ruta")) {
+      const r = parseInt(element.dataset.rad);
+      const k = parseInt(element.dataset.kol);
+
+      if (r === dragRad) {
+        dragSlutKol = k;
+        visaDragFörhandsvisning();
+      }
+    }
+  }, { passive: false });
 
   // Skapa separator-linjer
   skapaSeparatorLinjer();
 
   // Skapa rutnummer-rad (under grid)
   skapaRutnummerRad();
-
-  // Mouseup - avsluta drag
-  document.addEventListener("mouseup", function (e) {
-    if (!ärIDrag) return;
-
-    const startKol = Math.min(dragStartKol, dragSlutKol);
-    const slutKol = Math.max(dragStartKol, dragSlutKol);
-    const längd = slutKol - startKol + 1;
-
-    // Kolla om vi klickar på ett existerande block (för att ta bort det)
-    if (längd === 1) {
-      const existerandeBlock = hittaBlock(dragRad, startKol);
-      if (existerandeBlock) {
-        taBortBlock(dragRad, existerandeBlock);
-      } else {
-        läggTillBlock(dragRad, startKol, 1);
-      }
-    } else {
-      // Dra = skapa nytt block
-      läggTillBlock(dragRad, startKol, längd);
-    }
-
-    ärIDrag = false;
-    dragRad = null;
-    dragStartKol = null;
-    dragSlutKol = null;
-
-    rensaDragFörhandsvisning();
-    renderaBlock();
-    markeraÄndring(); // NYT - Markera att grid har ändrats
-  });
 
   // Visa/dölj bas-volym
   const volymBasGrupp = document.getElementById("volym-bas-grupp");
