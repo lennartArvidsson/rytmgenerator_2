@@ -142,13 +142,11 @@ let spelareInterval = null;
 let nuvarandeRuta = 0;
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-// iOS ljudfix - AudioContext måste startas av user interaction
-let audioContextStartad = false;
+// iOS ljudfix - AudioContext kan suspendas av iOS när som helst, inte bara första gången
 function startaAudioContext() {
-  if (!audioContextStartad && audioContext.state === "suspended") {
+  if (audioContext.state === "suspended") {
     audioContext.resume().then(() => {
-      audioContextStartad = true;
-      console.log("AudioContext startad för iOS");
+      console.log("AudioContext återupptagen för iOS");
     });
   }
 }
@@ -1043,6 +1041,11 @@ function spelaTon(radIndex, blockLängd = 1) {
 
 // Uppspelningsloop
 function spelaSteg() {
+  // iOS kan suspendera AudioContext i bakgrunden - återuppta om nödvändigt
+  if (audioContext.state === "suspended") {
+    audioContext.resume();
+  }
+
   rutor.forEach((rad) => rad.forEach((r) => r.classList.remove("spelar")));
 
   for (let rad = 0; rad < config.antalRader; rad++) {
