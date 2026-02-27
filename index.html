@@ -43,7 +43,7 @@
           <h2 id="mönster-titel">Nytt mönster</h2>
         </div>
 
-        <div class="grid-och-knappar-container">
+        <div class="-och-knappar-container">
           <div id="grid-wrapper">
             <div id="rytm-grid"></div>
           </div>
@@ -75,6 +75,7 @@
           <button class="flik aktiv" data-flik="grid">Grid</button>
           <button class="flik" data-flik="ljud">Ljud</button>
           <button class="flik" data-flik="patterns">Mönster</button>
+          <button class="flik flik-hjälp" data-flik="hjälp">?</button>
         </div>
 
         <!-- FLIK 1: GRID -->
@@ -223,7 +224,163 @@
             </div>
           </div>
         </div>
+        <!-- FLIK 4: HJÄLP -->
+        <div class="flik-innehåll" id="flik-hjälp">
+          <div class="hjälp-innehåll">
+            <h3>Vad är Rytmgeneratorn?</h3>
+            <p>
+              Ett verktyg för att visualisera och öva rytmmönster vid pianospel.
+              Du ritar ut när diskant (höger hand) och bas (vänster hand) ska
+              spela – och lyssnar sedan på resultatet.
+            </p>
+
+            <h3>Kom igång</h3>
+            <ol class="hjälp-lista">
+              <li>
+                <strong>Rita block</strong> – Klicka eller dra i gridets rutor
+                för att markera var noter ska falla.
+              </li>
+              <li>
+                <strong>Tryck Spela</strong> – Eller använd <kbd>Space</kbd> för
+                att starta/stoppa.
+              </li>
+              <li>
+                <strong>Justera tempo</strong> – Använd slidern eller
+                piltangenterna <kbd>←</kbd> <kbd>→</kbd>.
+              </li>
+              <li>
+                <strong>Spara mönster</strong> – Gå till fliken Mönster, ge det
+                ett namn och tryck Spara.
+              </li>
+            </ol>
+
+            <h3>Gridets uppbyggnad</h3>
+            <p>
+              Varje rad är ett spår – övre raden är
+              <strong>Diskant</strong> (höger hand), undre är
+              <strong>Bas</strong> (vänster hand). Varje ruta är en taktdel. Ett
+              grönt block = en not som spelas.
+            </p>
+
+            <h3>Ljud</h3>
+            <p>
+              Under fliken <strong>Ljud</strong> väljer du om du vill höra toner
+              (oscillatorer) eller perkussionsljud (klapp, duns). Du kan justera
+              volymen för diskant och bas separat.
+            </p>
+
+            <h3>Tangentbordsgenvägar</h3>
+            <table class="hjälp-tabell">
+              <tr>
+                <td><kbd>Space</kbd></td>
+                <td>Spela / Stopp</td>
+              </tr>
+              <tr>
+                <td><kbd>C</kbd></td>
+                <td>Rensa grid</td>
+              </tr>
+              <tr>
+                <td><kbd>←</kbd> <kbd>→</kbd></td>
+                <td>Sänk / Höj tempo (5 BPM)</td>
+              </tr>
+            </table>
+
+            <div class="hjälp-visa-intro">
+              <button id="visa-intro-igen">Visa introduktionen igen</button>
+            </div>
+          </div>
+        </div>
       </aside>
+    </div>
+
+    <!-- VÄLKOMSTMODAL -->
+    <div
+      id="välkomst-modal"
+      class="modal-bakgrund"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-rubrik"
+    >
+      <div class="modal-ruta">
+        <!-- Steg-indikatorer -->
+        <div class="modal-steg-indikator">
+          <span class="steg-punkt aktiv" data-steg="0"></span>
+          <span class="steg-punkt" data-steg="1"></span>
+          <span class="steg-punkt" data-steg="2"></span>
+          <span class="steg-punkt" data-steg="3"></span>
+        </div>
+
+        <!-- Steg 0: Välkommen -->
+        <div class="modal-steg aktiv" id="modal-steg-0">
+          <div class="modal-ikon">🎹</div>
+          <h2 id="modal-rubrik">Välkommen till Rytmgeneratorn!</h2>
+          <p>
+            Ett verktyg för att öva rytmmönster – perfekt för att visualisera
+            hur höger och vänster hand ska samspela.
+          </p>
+          <p>Den här korta guiden visar dig hur det fungerar.</p>
+        </div>
+
+        <!-- Steg 1: Grid -->
+        <div class="modal-steg" id="modal-steg-1">
+          <div class="modal-ikon">🟩</div>
+          <h2>Rita ditt rytmmönster</h2>
+          <p>
+            Griden är din notbild. <strong>Klicka</strong> på en ruta för att
+            aktivera den, eller <strong>dra</strong> för att skapa längre block.
+          </p>
+          <p>
+            Övre raden = <strong>Diskant</strong> (höger hand)<br />
+            Undre raden = <strong>Bas</strong> (vänster hand)
+          </p>
+        </div>
+
+        <!-- Steg 2: Spela -->
+        <div class="modal-steg" id="modal-steg-2">
+          <div class="modal-ikon">▶️</div>
+          <h2>Lyssna och öva</h2>
+          <p>
+            Tryck <strong>Spela</strong> – eller använd <kbd>Space</kbd> – för
+            att höra ditt mönster. Justera tempot med slidern eller
+            piltangenterna <kbd>←</kbd> <kbd>→</kbd>.
+          </p>
+          <p>
+            Under fliken <strong>Ljud</strong> väljer du om du vill höra toner
+            eller perkussionsljud.
+          </p>
+        </div>
+
+        <!-- Steg 3: Spara -->
+        <div class="modal-steg" id="modal-steg-3">
+          <div class="modal-ikon">💾</div>
+          <h2>Spara dina mönster</h2>
+          <p>
+            Under fliken <strong>Mönster</strong> kan du spara och ladda
+            rytmmönster. Allt sparas lokalt i webbläsaren.
+          </p>
+          <p>
+            Har du frågor? Klicka på <strong>?</strong>-fliken i
+            inställningspanelen.
+          </p>
+        </div>
+
+        <!-- Knappar -->
+        <div class="modal-knappar">
+          <button
+            id="modal-föregående"
+            class="modal-btn sekundär"
+            style="visibility: hidden"
+          >
+            ← Föregående
+          </button>
+          <button id="modal-nästa" class="modal-btn primär">Nästa →</button>
+        </div>
+        <div class="modal-stäng-rad">
+          <button id="modal-stäng-text" class="modal-btn länk">
+            Hoppa över
+          </button>
+        </div>
+      </div>
     </div>
 
     <script src="scripts.js"></script>

@@ -750,20 +750,24 @@ function skapaGrid() {
       });
 
       // ============ TOUCH EVENTS (för iPad/iPhone) ============
-      ruta.addEventListener("touchstart", function (e) {
-        e.preventDefault();
-        startaAudioContext(); // iOS ljudfix
+      ruta.addEventListener(
+        "touchstart",
+        function (e) {
+          e.preventDefault();
+          startaAudioContext(); // iOS ljudfix
 
-        const r = parseInt(this.dataset.rad);
-        const k = parseInt(this.dataset.kol);
+          const r = parseInt(this.dataset.rad);
+          const k = parseInt(this.dataset.kol);
 
-        ärIDrag = true;
-        dragRad = r;
-        dragStartKol = k;
-        dragSlutKol = k;
+          ärIDrag = true;
+          dragRad = r;
+          dragStartKol = k;
+          dragSlutKol = k;
 
-        visaDragFörhandsvisning();
-      }, { passive: false });
+          visaDragFörhandsvisning();
+        },
+        { passive: false },
+      );
 
       grid.appendChild(ruta);
       rutor[rad].push(ruta);
@@ -771,23 +775,27 @@ function skapaGrid() {
   }
 
   // ============ TOUCH MOVE på grid-nivå (krävs för iOS) ============
-  grid.addEventListener("touchmove", function (e) {
-    if (!ärIDrag) return;
-    e.preventDefault();
+  grid.addEventListener(
+    "touchmove",
+    function (e) {
+      if (!ärIDrag) return;
+      e.preventDefault();
 
-    const touch = e.touches[0];
-    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+      const touch = e.touches[0];
+      const element = document.elementFromPoint(touch.clientX, touch.clientY);
 
-    if (element && element.classList.contains("ruta")) {
-      const r = parseInt(element.dataset.rad);
-      const k = parseInt(element.dataset.kol);
+      if (element && element.classList.contains("ruta")) {
+        const r = parseInt(element.dataset.rad);
+        const k = parseInt(element.dataset.kol);
 
-      if (r === dragRad) {
-        dragSlutKol = k;
-        visaDragFörhandsvisning();
+        if (r === dragRad) {
+          dragSlutKol = k;
+          visaDragFörhandsvisning();
+        }
       }
-    }
-  }, { passive: false });
+    },
+    { passive: false },
+  );
 
   // Skapa separator-linjer
   skapaSeparatorLinjer();
@@ -1271,6 +1279,79 @@ document.getElementById("tillämpa").addEventListener("click", function () {
 
   skapaGrid();
 });
+
+// ============ VÄLKOMSTMODAL ============
+
+let nuvarandeModalSteg = 0;
+const antalModalSteg = 4;
+
+function visaModalSteg(steg) {
+  // Dölj alla steg
+  document.querySelectorAll('.modal-steg').forEach(s => s.classList.remove('aktiv'));
+  document.querySelectorAll('.steg-punkt').forEach(p => p.classList.remove('aktiv'));
+
+  // Visa valt steg
+  document.getElementById(`modal-steg-${steg}`).classList.add('aktiv');
+  document.querySelector(`.steg-punkt[data-steg="${steg}"]`).classList.add('aktiv');
+
+  // Uppdatera knappar
+  const föregående = document.getElementById('modal-föregående');
+  const nästa = document.getElementById('modal-nästa');
+
+  föregående.style.visibility = steg === 0 ? 'hidden' : 'visible';
+
+  if (steg === antalModalSteg - 1) {
+    nästa.textContent = 'Kom igång! ✓';
+  } else {
+    nästa.textContent = 'Nästa →';
+  }
+
+  nuvarandeModalSteg = steg;
+}
+
+function öppnaModal() {
+  nuvarandeModalSteg = 0;
+  visaModalSteg(0);
+  document.getElementById('välkomst-modal').classList.add('synlig');
+}
+
+function stängaModal() {
+  document.getElementById('välkomst-modal').classList.remove('synlig');
+  localStorage.setItem('rytmIntroVisad', 'true');
+}
+
+// Knappar i modalen
+document.getElementById('modal-nästa').addEventListener('click', function () {
+  if (nuvarandeModalSteg < antalModalSteg - 1) {
+    visaModalSteg(nuvarandeModalSteg + 1);
+  } else {
+    stängaModal();
+  }
+});
+
+document.getElementById('modal-föregående').addEventListener('click', function () {
+  if (nuvarandeModalSteg > 0) {
+    visaModalSteg(nuvarandeModalSteg - 1);
+  }
+});
+
+document.getElementById('modal-stäng-text').addEventListener('click', stängaModal);
+
+// Stäng om man klickar utanför modalrutan
+document.getElementById('välkomst-modal').addEventListener('click', function (e) {
+  if (e.target === this) stängaModal();
+});
+
+// "Visa introduktionen igen"-knapp i hjälpfliken
+document.getElementById('visa-intro-igen').addEventListener('click', öppnaModal);
+
+// Visa modal första gången
+if (!localStorage.getItem('rytmIntroVisad')) {
+  // Kort fördröjning så sidan hinner ladda klart
+  setTimeout(öppnaModal, 300);
+}
+
+// =======================================
 
 // ============ INITIALISERING ============
 laddaState(); // Ladda sparade inställningar först

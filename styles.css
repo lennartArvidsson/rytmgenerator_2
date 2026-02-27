@@ -498,3 +498,212 @@ aside h3 {
 #rytm-grid {
   touch-action: none;
 }
+
+/* ============ HJÄLPFLIK ============ */
+
+.flik-hjälp {
+  flex: 0 0 auto;
+  width: 36px;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.hjälp-innehåll {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.hjälp-innehåll h3 {
+  font-size: 14px;
+  margin-top: 16px;
+  margin-bottom: 6px;
+  color: #1976d2;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 3px;
+}
+
+.hjälp-innehåll h3:first-child {
+  margin-top: 0;
+}
+
+.hjälp-innehåll p {
+  margin: 0 0 8px 0;
+}
+
+.hjälp-lista {
+  padding-left: 18px;
+  margin: 0 0 8px 0;
+}
+
+.hjälp-lista li {
+  margin-bottom: 6px;
+}
+
+.hjälp-tabell {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+}
+
+.hjälp-tabell td {
+  padding: 4px 8px 4px 0;
+  vertical-align: middle;
+}
+
+.hjälp-tabell td:first-child {
+  white-space: nowrap;
+}
+
+kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-family: monospace;
+  background-color: #e8e8e8;
+  border: 1px solid #bbb;
+  border-radius: 3px;
+  color: #333;
+}
+
+.hjälp-visa-intro {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.hjälp-visa-intro button {
+  font-size: 13px;
+  padding: 8px 14px;
+  background-color: #e8e8e8;
+  color: #333;
+}
+
+.hjälp-visa-intro button:hover {
+  background-color: #d0d0d0;
+}
+
+/* ============ VÄLKOMSTMODAL ============ */
+
+.modal-bakgrund {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-bakgrund.synlig {
+  display: flex;
+}
+
+.modal-ruta {
+  background: white;
+  border-radius: 12px;
+  padding: 32px 36px 24px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  text-align: center;
+}
+
+.modal-steg-indikator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.steg-punkt {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ddd;
+  display: inline-block;
+  transition: background-color 0.2s;
+}
+
+.steg-punkt.aktiv {
+  background-color: #2196f3;
+}
+
+.modal-steg {
+  display: none;
+  min-height: 160px;
+}
+
+.modal-steg.aktiv {
+  display: block;
+}
+
+.modal-ikon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.modal-ruta h2 {
+  font-size: 20px;
+  margin: 0 0 12px 0;
+  color: #222;
+}
+
+.modal-ruta p {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+  margin: 0 0 10px 0;
+}
+
+.modal-knappar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 28px;
+  gap: 10px;
+}
+
+.modal-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-btn.primär {
+  background-color: #2196f3;
+  color: white;
+  flex: 1;
+}
+
+.modal-btn.primär:hover {
+  background-color: #0b7dda;
+}
+
+.modal-btn.sekundär {
+  background-color: #e8e8e8;
+  color: #333;
+  flex: 1;
+}
+
+.modal-btn.sekundär:hover {
+  background-color: #d0d0d0;
+}
+
+.modal-stäng-rad {
+  margin-top: 10px;
+}
+
+.modal-btn.länk {
+  background: none;
+  color: #999;
+  font-size: 13px;
+  padding: 6px 12px;
+  text-decoration: underline;
+}
+
+.modal-btn.länk:hover {
+  color: #666;
+  background: none;
+}
