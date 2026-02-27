@@ -109,7 +109,7 @@ main {
 #rytm-grid {
   display: grid;
   grid-template-columns: repeat(16, 40px);
-  gap: 5px;
+  gap: 3px;
   margin: 20px 0;
   position: relative;
 }
@@ -151,18 +151,19 @@ main {
   border-radius: 2px;
   top: 0;
   pointer-events: none;
-  z-index: 1;
+  background-color: #333;
+  z-index: 0;
 }
 
 /* Horisontell separator mellan bas och diskant */
 .rad-separator-linje {
   position: absolute;
   height: 3px;
-  background-color: #666;
+  background-color: #333;
   border-radius: 2px;
   left: 0;
   pointer-events: none;
-  z-index: 1;
+  z-index: 0;
 }
 
 /* Rutnummer */
@@ -197,6 +198,8 @@ main {
   border-radius: 4px;
   position: relative;
   box-sizing: border-box;
+  opacity: 0.9;
+  z-index: 1;
 }
 
 .ruta.spelar {
@@ -604,7 +607,7 @@ kbd {
   padding: 32px 36px 24px;
   max-width: 420px;
   width: 90%;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
   text-align: center;
 }
 

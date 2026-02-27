@@ -21,7 +21,7 @@ const config = {
 
   // Utseende
   rutStorlek: 40,
-  gap: 5,
+  gap: 3,
 
   // Färger
   farger: {
@@ -1287,23 +1287,29 @@ const antalModalSteg = 4;
 
 function visaModalSteg(steg) {
   // Dölj alla steg
-  document.querySelectorAll('.modal-steg').forEach(s => s.classList.remove('aktiv'));
-  document.querySelectorAll('.steg-punkt').forEach(p => p.classList.remove('aktiv'));
+  document
+    .querySelectorAll(".modal-steg")
+    .forEach((s) => s.classList.remove("aktiv"));
+  document
+    .querySelectorAll(".steg-punkt")
+    .forEach((p) => p.classList.remove("aktiv"));
 
   // Visa valt steg
-  document.getElementById(`modal-steg-${steg}`).classList.add('aktiv');
-  document.querySelector(`.steg-punkt[data-steg="${steg}"]`).classList.add('aktiv');
+  document.getElementById(`modal-steg-${steg}`).classList.add("aktiv");
+  document
+    .querySelector(`.steg-punkt[data-steg="${steg}"]`)
+    .classList.add("aktiv");
 
   // Uppdatera knappar
-  const föregående = document.getElementById('modal-föregående');
-  const nästa = document.getElementById('modal-nästa');
+  const föregående = document.getElementById("modal-föregående");
+  const nästa = document.getElementById("modal-nästa");
 
-  föregående.style.visibility = steg === 0 ? 'hidden' : 'visible';
+  föregående.style.visibility = steg === 0 ? "hidden" : "visible";
 
   if (steg === antalModalSteg - 1) {
-    nästa.textContent = 'Kom igång! ✓';
+    nästa.textContent = "Kom igång! ✓";
   } else {
-    nästa.textContent = 'Nästa →';
+    nästa.textContent = "Nästa →";
   }
 
   nuvarandeModalSteg = steg;
@@ -1312,16 +1318,16 @@ function visaModalSteg(steg) {
 function öppnaModal() {
   nuvarandeModalSteg = 0;
   visaModalSteg(0);
-  document.getElementById('välkomst-modal').classList.add('synlig');
+  document.getElementById("välkomst-modal").classList.add("synlig");
 }
 
 function stängaModal() {
-  document.getElementById('välkomst-modal').classList.remove('synlig');
-  localStorage.setItem('rytmIntroVisad', 'true');
+  document.getElementById("välkomst-modal").classList.remove("synlig");
+  localStorage.setItem("rytmIntroVisad", "true");
 }
 
 // Knappar i modalen
-document.getElementById('modal-nästa').addEventListener('click', function () {
+document.getElementById("modal-nästa").addEventListener("click", function () {
   if (nuvarandeModalSteg < antalModalSteg - 1) {
     visaModalSteg(nuvarandeModalSteg + 1);
   } else {
@@ -1329,24 +1335,32 @@ document.getElementById('modal-nästa').addEventListener('click', function () {
   }
 });
 
-document.getElementById('modal-föregående').addEventListener('click', function () {
-  if (nuvarandeModalSteg > 0) {
-    visaModalSteg(nuvarandeModalSteg - 1);
-  }
-});
+document
+  .getElementById("modal-föregående")
+  .addEventListener("click", function () {
+    if (nuvarandeModalSteg > 0) {
+      visaModalSteg(nuvarandeModalSteg - 1);
+    }
+  });
 
-document.getElementById('modal-stäng-text').addEventListener('click', stängaModal);
+document
+  .getElementById("modal-stäng-text")
+  .addEventListener("click", stängaModal);
 
 // Stäng om man klickar utanför modalrutan
-document.getElementById('välkomst-modal').addEventListener('click', function (e) {
-  if (e.target === this) stängaModal();
-});
+document
+  .getElementById("välkomst-modal")
+  .addEventListener("click", function (e) {
+    if (e.target === this) stängaModal();
+  });
 
 // "Visa introduktionen igen"-knapp i hjälpfliken
-document.getElementById('visa-intro-igen').addEventListener('click', öppnaModal);
+document
+  .getElementById("visa-intro-igen")
+  .addEventListener("click", öppnaModal);
 
 // Visa modal första gången
-if (!localStorage.getItem('rytmIntroVisad')) {
+if (!localStorage.getItem("rytmIntroVisad")) {
   // Kort fördröjning så sidan hinner ladda klart
   setTimeout(öppnaModal, 300);
 }
