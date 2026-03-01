@@ -45,6 +45,8 @@ const tillgängligaLjud = [
   "duns_bas",
   "Metronom-klick",
   "Metronom-klocka",
+  "bongo",
+  "taiko",
   // Lägg till fler ljudfiler här efter hand
 ];
 
