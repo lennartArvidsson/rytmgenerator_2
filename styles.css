@@ -491,8 +491,33 @@ aside h3 {
   opacity: 0.6;
 }
 
-.ruta {
-  touch-action: none;
+/* Volym-rad med dynamik-kryssruta */
+.volym-med-dynamik {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.volym-med-dynamik input[type="range"] {
+  flex: 1;
+}
+
+.dynamik-label {
+  display: flex !important;
+  align-items: center;
+  gap: 5px;
+  font-weight: normal !important;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  color: #555;
+}
+
+.dynamik-label input[type="checkbox"] {
+  cursor: pointer;
+}
+
+
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;

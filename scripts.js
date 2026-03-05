@@ -19,6 +19,10 @@ const config = {
   tonLangd: 0.1,
   ljudläge: "ton", // 'ton' eller 'perkussion'
 
+  // Rytmdynamik
+  dynamikSpår1: true,   // Aktivera dynamik för spår 1
+  dynamikSpår2: true,   // Aktivera dynamik för spår 2
+
   // Utseende
   rutStorlek: 40,
   gap: 3,
@@ -525,6 +529,8 @@ function sparaState() {
     visaMönsterTitel: config.visaMönsterTitel,
     visaKvarttoner: config.visaKvarttoner,
     visaRutnummer: config.visaRutnummer,
+    dynamikSpår1: config.dynamikSpår1,
+    dynamikSpår2: config.dynamikSpår2,
   };
 
   localStorage.setItem("rytmConfig", JSON.stringify(sparadConfig));
@@ -583,6 +589,12 @@ function laddaState() {
       config.visaKvarttoner !== false;
     document.getElementById("visa-rutnummer").checked =
       config.visaRutnummer === true;
+
+    // Dynamik-checkboxar
+    document.getElementById("dynamik-spår1").checked =
+      config.dynamikSpår1 !== false;
+    document.getElementById("dynamik-spår2").checked =
+      config.dynamikSpår2 !== false;
 
     console.log("Laddade sparade inställningar");
   }
@@ -974,24 +986,54 @@ function uppdateraMönsterTitel() {
   }
 }
 
-// Ljud-funktion med diskant/bas - nu med dynamisk tonlängd och perkussion
-function spelaLjud(radIndex, blockLängd = 1) {
+// ============ RYTMDYNAMIK ============
+
+// Beräknar volymfaktor baserat på position i takten och taktart
+function beräknaDynamikFaktor(position, taktart, minstaEnhet) {
+  const [täljare, nämnare] = taktart.split("/").map(Number);
+  const rutorPerSlag = minstaEnhet / nämnare;
+  const slagIndex = Math.floor(position / rutorPerSlag); // vilket slag (0-baserat)
+
+  // Dynamikmönster per taktart
+  // Värden: 1.0 = fullt, lägre = svagare
+  const dynamikMönster = {
+    "4/4": [1.0, 0.65, 0.80, 0.65],   // stark, svag, halvstark, svag
+    "3/4": [1.0, 0.65, 0.65],          // stark, svag, svag
+    "6/8": [1.0, 0.70, 0.70, 0.85, 0.70, 0.70], // stark, svag, svag, halvstark, svag, svag
+    "2/2": [1.0, 0.70],                // stark, svag
+  };
+
+  const mönster = dynamikMönster[taktart] || [1.0]; // fallback: ingen dynamik
+  return mönster[slagIndex % mönster.length];
+}
+
+// =====================================
+
+
+// Ljud-funktion med spår 1/spår 2 - nu med dynamisk tonlängd, perkussion och rytmdynamik
+function spelaLjud(radIndex, blockLängd = 1, position = 0) {
   if (config.ljudläge === "perkussion") {
-    spelaPerkussion(radIndex);
+    spelaPerkussion(radIndex, position);
   } else {
-    spelaTon(radIndex, blockLängd);
+    spelaTon(radIndex, blockLängd, position);
   }
 }
 
-function spelaPerkussion(radIndex) {
+function spelaPerkussion(radIndex, position = 0) {
   const ljudnamn = radIndex === 0 ? valdDiskantLjud : valdBasLjud;
   const sample = samples.ljudfiler[ljudnamn];
-  const volym = radIndex === 0 ? config.volym : config.volymTrack2;
+  const basVolym = radIndex === 0 ? config.volym : config.volymTrack2;
+  const dynamikAktiv = radIndex === 0 ? config.dynamikSpår1 : config.dynamikSpår2;
 
   if (!sample) {
     console.warn("Sample ej laddat för rad", radIndex, ljudnamn);
     return;
   }
+
+  const dynamikFaktor = dynamikAktiv
+    ? beräknaDynamikFaktor(position, config.taktart, config.minstaEnhet)
+    : 1.0;
+  const volym = basVolym * dynamikFaktor;
 
   const source = audioContext.createBufferSource();
   const gainNode = audioContext.createGain();
@@ -1004,46 +1046,41 @@ function spelaPerkussion(radIndex) {
   source.start();
 }
 
-function spelaTon(radIndex, blockLängd = 1) {
+function spelaTon(radIndex, blockLängd = 1, position = 0) {
   const oscillator = audioContext.createOscillator();
   const gainNode = audioContext.createGain();
 
   oscillator.connect(gainNode);
   gainNode.connect(audioContext.destination);
 
-  // Beräkna tonlängd baserat på blocklängd och tempo
-  const basLängd = config.intervall / 1000; // Konvertera till sekunder
-  const tonLängd = basLängd * blockLängd * 0.9; // 90% av full längd för att undvika överlapp
+  const basLängd = config.intervall / 1000;
+  const tonLängd = basLängd * blockLängd * 0.9;
+
+  const dynamikAktiv = radIndex === 0 ? config.dynamikSpår1 : config.dynamikSpår2;
+  const dynamikFaktor = dynamikAktiv
+    ? beräknaDynamikFaktor(position, config.taktart, config.minstaEnhet)
+    : 1.0;
 
   if (radIndex === 0) {
-    // Track 1 - Diskant/Höger hand
+    // Spår 1
     oscillator.frequency.value = 1200;
-    gainNode.gain.value = config.volym * 0.8;
-
-    // Fade out i slutet
-    gainNode.gain.setValueAtTime(config.volym * 0.8, audioContext.currentTime);
+    const toppVolym = config.volym * 0.8 * dynamikFaktor;
+    gainNode.gain.setValueAtTime(toppVolym, audioContext.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(
       0.01,
       audioContext.currentTime + tonLängd,
     );
-
     oscillator.start();
     oscillator.stop(audioContext.currentTime + tonLängd);
   } else {
-    // Track 2 - Bas/Vänster hand
+    // Spår 2
     oscillator.frequency.value = 400;
-    gainNode.gain.value = config.volymTrack2 * 1.2;
-
-    // Fade out i slutet
-    gainNode.gain.setValueAtTime(
-      config.volymTrack2 * 1.2,
-      audioContext.currentTime,
-    );
+    const toppVolym = config.volymTrack2 * 1.2 * dynamikFaktor;
+    gainNode.gain.setValueAtTime(toppVolym, audioContext.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(
       0.01,
       audioContext.currentTime + tonLängd,
     );
-
     oscillator.start();
     oscillator.stop(audioContext.currentTime + tonLängd);
   }
@@ -1064,8 +1101,8 @@ function spelaSteg() {
     // Kolla om denna position är START på ett block
     const block = hittaBlock(rad, nuvarandeRuta);
     if (block && block.start === nuvarandeRuta) {
-      // Spela ljud med blocklängd för rätt tonlängd
-      spelaLjud(rad, block.längd);
+      // Spela ljud med blocklängd och position för rytmdynamik
+      spelaLjud(rad, block.längd, nuvarandeRuta);
     }
   }
 
@@ -1281,6 +1318,21 @@ document.getElementById("tillämpa").addEventListener("click", function () {
 
   skapaGrid();
 });
+
+// Dynamik-checkboxar
+document
+  .getElementById("dynamik-spår1")
+  .addEventListener("change", function () {
+    config.dynamikSpår1 = this.checked;
+    sparaState();
+  });
+
+document
+  .getElementById("dynamik-spår2")
+  .addEventListener("change", function () {
+    config.dynamikSpår2 = this.checked;
+    sparaState();
+  });
 
 // ============ VÄLKOMSTMODAL ============
 

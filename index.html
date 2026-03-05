@@ -8,7 +8,7 @@
   </head>
 
   <body>
-    <h1>Rytmgenerator-2</h1>
+    <h1>Rytmgenerator</h1>
 
     <div id="container">
       <!-- ARBETSYTA -->
@@ -93,8 +93,8 @@
           <div class="inställnings-grupp">
             <label for="antal-tracks">Antal tracks:</label>
             <select id="antal-tracks">
-              <option value="1">1 (Diskant)</option>
-              <option value="2">2 (Diskant + Bas)</option>
+              <option value="1">1 (Spår 1)</option>
+              <option value="2">2 (Spår 1 + Spår 2)</option>
             </select>
           </div>
 
@@ -151,12 +151,12 @@
           </div>
 
           <div class="inställnings-grupp" id="perkussion-inställningar">
-            <label for="diskant-ljud">Diskant ljud:</label>
+            <label for="diskant-ljud">Spår 1 ljud:</label>
             <select id="diskant-ljud">
               <!-- Fylls dynamiskt med JavaScript -->
             </select>
 
-            <label for="bas-ljud">Bas ljud:</label>
+            <label for="bas-ljud">Spår 2 ljud:</label>
             <select id="bas-ljud">
               <!-- Fylls dynamiskt med JavaScript -->
             </select>
@@ -164,22 +164,34 @@
 
           <div class="inställnings-grupp">
             <label for="volym-diskant"
-              >Volym diskant: <span id="volym-diskant-värde">30</span>%</label
+              >Volym spår 1: <span id="volym-diskant-värde">30</span>%</label
             >
-            <input
-              type="range"
-              id="volym-diskant"
-              min="0"
-              max="100"
-              value="30"
-            />
+            <div class="volym-med-dynamik">
+              <input
+                type="range"
+                id="volym-diskant"
+                min="0"
+                max="100"
+                value="30"
+              />
+              <label class="dynamik-label" title="Rytmdynamik – ettan spelar starkare, svaga slag svagare">
+                <input type="checkbox" id="dynamik-spår1" checked />
+                Dynamik
+              </label>
+            </div>
           </div>
 
           <div class="inställnings-grupp" id="volym-bas-grupp">
             <label for="volym-bas"
-              >Volym bas: <span id="volym-bas-värde">30</span>%</label
+              >Volym spår 2: <span id="volym-bas-värde">30</span>%</label
             >
-            <input type="range" id="volym-bas" min="0" max="100" value="30" />
+            <div class="volym-med-dynamik">
+              <input type="range" id="volym-bas" min="0" max="100" value="30" />
+              <label class="dynamik-label" title="Rytmdynamik – ettan spelar starkare, svaga slag svagare">
+                <input type="checkbox" id="dynamik-spår2" checked />
+                Dynamik
+              </label>
+            </div>
           </div>
 
           <div class="inställnings-grupp">
@@ -230,7 +242,7 @@
             <h3>Vad är Rytmgeneratorn?</h3>
             <p>
               Ett verktyg för att visualisera och öva rytmmönster vid pianospel.
-              Du ritar ut när diskant (höger hand) och bas (vänster hand) ska
+              Du ritar ut när spår 1 (höger hand) och spår 2 (vänster hand) ska
               spela – och lyssnar sedan på resultatet.
             </p>
 
@@ -257,8 +269,8 @@
             <h3>Gridets uppbyggnad</h3>
             <p>
               Varje rad är ett spår – övre raden är
-              <strong>Diskant</strong> (höger hand), undre är
-              <strong>Bas</strong> (vänster hand). Varje ruta är en taktdel. Ett
+              <strong>Spår 1</strong> (höger hand), undre är
+              <strong>Spår 2</strong> (vänster hand). Varje ruta är en taktdel. Ett
               grönt block = en not som spelas.
             </p>
 
@@ -266,7 +278,7 @@
             <p>
               Under fliken <strong>Ljud</strong> väljer du om du vill höra toner
               (oscillatorer) eller perkussionsljud (klapp, duns). Du kan justera
-              volymen för diskant och bas separat.
+              volymen för spår 1 och spår 2 separat.
             </p>
 
             <h3>Tangentbordsgenvägar</h3>
@@ -330,8 +342,8 @@
             aktivera den, eller <strong>dra</strong> för att skapa längre block.
           </p>
           <p>
-            Övre raden = <strong>Diskant</strong> (höger hand)<br />
-            Undre raden = <strong>Bas</strong> (vänster hand)
+            Övre raden = <strong>Spår 1</strong> (höger hand)<br />
+            Undre raden = <strong>Spår 2</strong> (vänster hand)
           </p>
         </div>
 
