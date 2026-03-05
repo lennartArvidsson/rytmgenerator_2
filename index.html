@@ -195,17 +195,20 @@
           </div>
 
           <div class="inställnings-grupp">
-            <label for="pulstid"
-              >Pulstid: <span id="pulstid-värde">100</span>ms</label
+            <label for="dynamik-nivå"
+              >Dynamiknivå: <span id="dynamik-nivå-värde">Medel</span></label
             >
             <input
               type="range"
-              id="pulstid"
-              min="50"
-              max="500"
-              value="100"
-              step="10"
+              id="dynamik-nivå"
+              min="0"
+              max="100"
+              value="50"
+              step="1"
             />
+            <div class="dynamik-nivå-beskrivning">
+              <span>Liten skillnad</span><span>Stor skillnad</span>
+            </div>
           </div>
         </div>
 

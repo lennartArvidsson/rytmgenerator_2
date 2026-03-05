@@ -16,12 +16,12 @@ const config = {
   frekvens: 800,
   volym: 0.3,
   volymTrack2: 0.3,
-  tonLangd: 0.1,
   ljudläge: "ton", // 'ton' eller 'perkussion'
 
   // Rytmdynamik
   dynamikSpår1: true,   // Aktivera dynamik för spår 1
   dynamikSpår2: true,   // Aktivera dynamik för spår 2
+  dynamikNivå: 50,      // 0–100, styr hur stor skillnaden är mellan accent och svagt slag
 
   // Utseende
   rutStorlek: 40,
@@ -524,7 +524,7 @@ function sparaState() {
     tempo: config.tempo,
     volym: config.volym,
     volymTrack2: config.volymTrack2,
-    tonLangd: config.tonLangd,
+    dynamikNivå: config.dynamikNivå,
     ljudläge: config.ljudläge,
     visaMönsterTitel: config.visaMönsterTitel,
     visaKvarttoner: config.visaKvarttoner,
@@ -565,12 +565,9 @@ function laddaState() {
       config.volymTrack2 * 100,
     );
 
-    document.getElementById("pulstid").value = Math.round(
-      config.tonLangd * 1000,
-    );
-    document.getElementById("pulstid-värde").textContent = Math.round(
-      config.tonLangd * 1000,
-    );
+    const dynamikNivå = config.dynamikNivå !== undefined ? config.dynamikNivå : 50;
+    document.getElementById("dynamik-nivå").value = dynamikNivå;
+    document.getElementById("dynamik-nivå-värde").textContent = dynamikNivåText(dynamikNivå);
 
     document.getElementById("taktart").value = config.taktart;
     document.getElementById("antal-tracks").value = config.antalRader;
@@ -988,23 +985,32 @@ function uppdateraMönsterTitel() {
 
 // ============ RYTMDYNAMIK ============
 
-// Beräknar volymfaktor baserat på position i takten och taktart
+// Beräknar volymfaktor baserat på position i takten och taktart.
+// dynamikNivå (0–100) styr hur stor skillnaden är:
+//   0   = alla slag lika starka (faktor 1.0)
+//   50  = mellannivå
+//   100 = maximal skillnad (accenterna på full volym, svaga slag mycket tystare)
 function beräknaDynamikFaktor(position, taktart, minstaEnhet) {
-  const [täljare, nämnare] = taktart.split("/").map(Number);
+  const [, nämnare] = taktart.split("/").map(Number);
   const rutorPerSlag = minstaEnhet / nämnare;
-  const slagIndex = Math.floor(position / rutorPerSlag); // vilket slag (0-baserat)
+  const slagIndex = Math.floor(position / rutorPerSlag);
 
-  // Dynamikmönster per taktart
-  // Värden: 1.0 = fullt, lägre = svagare
-  const dynamikMönster = {
-    "4/4": [1.0, 0.65, 0.80, 0.65],   // stark, svag, halvstark, svag
-    "3/4": [1.0, 0.65, 0.65],          // stark, svag, svag
-    "6/8": [1.0, 0.70, 0.70, 0.85, 0.70, 0.70], // stark, svag, svag, halvstark, svag, svag
-    "2/2": [1.0, 0.70],                // stark, svag
+  // Grundmönster per taktart – värden 0..1 där 1 = accent, 0 = svagast möjligt
+  // Dessa relativa värden skalas sedan av dynamikNivå
+  const grundMönster = {
+    "4/4": [1.0, 0.0, 0.5, 0.0],
+    "3/4": [1.0, 0.0, 0.0],
+    "6/8": [1.0, 0.0, 0.0, 0.6, 0.0, 0.0],
+    "2/2": [1.0, 0.0],
   };
 
-  const mönster = dynamikMönster[taktart] || [1.0]; // fallback: ingen dynamik
-  return mönster[slagIndex % mönster.length];
+  const mönster = grundMönster[taktart] || [1.0];
+  const relativ = mönster[slagIndex % mönster.length]; // 0..1
+
+  // Skala: vid nivå 0 → alla = 1.0; vid nivå 100 → accent = 1.0, svagast = minFaktor
+  const minFaktor = 0.40; // svagaste möjliga slag vid max dynamik
+  const t = config.dynamikNivå / 100; // 0..1
+  return 1.0 - t * (1.0 - minFaktor) * (1.0 - relativ);
 }
 
 // =====================================
@@ -1278,14 +1284,22 @@ volymBasSlider.addEventListener("input", function () {
   volymBasVärde.textContent = procent;
 });
 
-// Pulstid slider
-const pulstidSlider = document.getElementById("pulstid");
-const pulstidVärde = document.getElementById("pulstid-värde");
+// Dynamiknivå slider
+const dynamikNivåSlider = document.getElementById("dynamik-nivå");
+const dynamikNivåVärde = document.getElementById("dynamik-nivå-värde");
 
-pulstidSlider.addEventListener("input", function () {
-  const ms = parseInt(this.value);
-  config.tonLangd = ms / 1000;
-  pulstidVärde.textContent = ms;
+function dynamikNivåText(värde) {
+  if (värde <= 15) return "Minimal";
+  if (värde <= 35) return "Liten";
+  if (värde <= 65) return "Medel";
+  if (värde <= 85) return "Stor";
+  return "Maximal";
+}
+
+dynamikNivåSlider.addEventListener("input", function () {
+  config.dynamikNivå = parseInt(this.value);
+  dynamikNivåVärde.textContent = dynamikNivåText(config.dynamikNivå);
+  sparaState();
 });
 
 // Ljudläge radio-knappar

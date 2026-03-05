@@ -491,7 +491,16 @@ aside h3 {
   opacity: 0.6;
 }
 
-/* Volym-rad med dynamik-kryssruta */
+/* Dynamiknivå slider beskrivning */
+.dynamik-nivå-beskrivning {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #999;
+  margin-top: 3px;
+}
+
+
 .volym-med-dynamik {
   display: flex;
   align-items: center;
