@@ -63,17 +63,23 @@ let valdDiskantLjud = "klapp_disk";
 let valdBasLjud = "duns_bas";
 
 async function laddaSamples() {
+  const ctx = hämtaAudioContext();
+  samplesLaddade = false;
+
   // Ladda alla tillgängliga ljudfiler
   for (const ljudnamn of tillgängligaLjud) {
     try {
       const response = await fetch(`Audio/${ljudnamn}.wav`);
       const buffer = await response.arrayBuffer();
-      samples.ljudfiler[ljudnamn] = await audioContext.decodeAudioData(buffer);
+      samples.ljudfiler[ljudnamn] = await ctx.decodeAudioData(buffer);
       console.log(`Laddade ${ljudnamn}`);
     } catch (e) {
       console.warn(`Kunde inte ladda ${ljudnamn}:`, e);
     }
   }
+
+  samplesLaddade = true;
+  console.log("Alla samples laddade");
 
   // Fyll i dropdown-menyer
   fyllLjudDropdowns();
@@ -146,15 +152,35 @@ function läggTillBlock(rad, start, längd) {
 let rutor = [];
 let spelareInterval = null;
 let nuvarandeRuta = 0;
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-// iOS ljudfix - AudioContext kan suspendas av iOS när som helst, inte bara första gången
+// iOS-fix: AudioContext skapas lazy vid första användarinteraktion.
+// Om den skapas direkt vid sidladdning hamnar den på iOS i "suspended"
+// och samples kan misslyckas att laddas in tyst.
+let audioContext = null;
+let samplesLaddade = false;
+
+function hämtaAudioContext() {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    console.log("AudioContext skapad, state:", audioContext.state);
+  }
+  return audioContext;
+}
+
+// iOS ljudfix - AudioContext kan suspendas av iOS när som helst.
+// Returnerar ett Promise som resolvar när kontexten är running.
 function startaAudioContext() {
-  if (audioContext.state === "suspended") {
-    audioContext.resume().then(() => {
-      console.log("AudioContext återupptagen för iOS");
+  const ctx = hämtaAudioContext();
+  if (ctx.state === "suspended") {
+    return ctx.resume().then(() => {
+      console.log("AudioContext återupptagen, state:", ctx.state);
+      // Om samples inte laddats än (t.ex. första gången), ladda dem nu
+      if (!samplesLaddade) {
+        return laddaSamples();
+      }
     });
   }
+  return Promise.resolve();
 }
 
 // Drag-variabler
@@ -469,11 +495,13 @@ document.addEventListener("keydown", function (e) {
   switch (e.key.toLowerCase()) {
     case " ": // Space - Toggle play/stop
       e.preventDefault();
-      if (spelareInterval === null) {
-        spelareInterval = setInterval(spelaSteg, config.intervall);
-      } else {
-        stoppaSpelaer();
-      }
+      startaAudioContext().then(() => {
+        if (spelareInterval === null) {
+          spelareInterval = setInterval(spelaSteg, config.intervall);
+        } else {
+          stoppaSpelaer();
+        }
+      });
       break;
 
     case "c": // C - Rensa
@@ -1026,6 +1054,7 @@ function spelaLjud(radIndex, blockLängd = 1, position = 0) {
 }
 
 function spelaPerkussion(radIndex, position = 0) {
+  const ctx = hämtaAudioContext();
   const ljudnamn = radIndex === 0 ? valdDiskantLjud : valdBasLjud;
   const sample = samples.ljudfiler[ljudnamn];
   const basVolym = radIndex === 0 ? config.volym : config.volymTrack2;
@@ -1041,23 +1070,24 @@ function spelaPerkussion(radIndex, position = 0) {
     : 1.0;
   const volym = basVolym * dynamikFaktor;
 
-  const source = audioContext.createBufferSource();
-  const gainNode = audioContext.createGain();
+  const source = ctx.createBufferSource();
+  const gainNode = ctx.createGain();
 
   source.buffer = sample;
   source.connect(gainNode);
-  gainNode.connect(audioContext.destination);
+  gainNode.connect(ctx.destination);
 
   gainNode.gain.value = volym;
   source.start();
 }
 
 function spelaTon(radIndex, blockLängd = 1, position = 0) {
-  const oscillator = audioContext.createOscillator();
-  const gainNode = audioContext.createGain();
+  const ctx = hämtaAudioContext();
+  const oscillator = ctx.createOscillator();
+  const gainNode = ctx.createGain();
 
   oscillator.connect(gainNode);
-  gainNode.connect(audioContext.destination);
+  gainNode.connect(ctx.destination);
 
   const basLängd = config.intervall / 1000;
   const tonLängd = basLängd * blockLängd * 0.9;
@@ -1071,32 +1101,33 @@ function spelaTon(radIndex, blockLängd = 1, position = 0) {
     // Spår 1
     oscillator.frequency.value = 1200;
     const toppVolym = config.volym * 0.8 * dynamikFaktor;
-    gainNode.gain.setValueAtTime(toppVolym, audioContext.currentTime);
+    gainNode.gain.setValueAtTime(toppVolym, ctx.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(
       0.01,
-      audioContext.currentTime + tonLängd,
+      ctx.currentTime + tonLängd,
     );
     oscillator.start();
-    oscillator.stop(audioContext.currentTime + tonLängd);
+    oscillator.stop(ctx.currentTime + tonLängd);
   } else {
     // Spår 2
     oscillator.frequency.value = 400;
     const toppVolym = config.volymTrack2 * 1.2 * dynamikFaktor;
-    gainNode.gain.setValueAtTime(toppVolym, audioContext.currentTime);
+    gainNode.gain.setValueAtTime(toppVolym, ctx.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(
       0.01,
-      audioContext.currentTime + tonLängd,
+      ctx.currentTime + tonLängd,
     );
     oscillator.start();
-    oscillator.stop(audioContext.currentTime + tonLängd);
+    oscillator.stop(ctx.currentTime + tonLängd);
   }
 }
 
 // Uppspelningsloop
 function spelaSteg() {
   // iOS kan suspendera AudioContext i bakgrunden - återuppta om nödvändigt
-  if (audioContext.state === "suspended") {
-    audioContext.resume();
+  const ctx = hämtaAudioContext();
+  if (ctx.state === "suspended") {
+    ctx.resume();
   }
 
   rutor.forEach((rad) => rad.forEach((r) => r.classList.remove("spelar")));
@@ -1158,10 +1189,13 @@ document
 
 // Spelknappar
 document.getElementById("spela").addEventListener("click", function () {
-  startaAudioContext(); // iOS ljudfix
-  if (spelareInterval === null) {
-    spelareInterval = setInterval(spelaSteg, config.intervall);
-  }
+  // startaAudioContext() skapar kontexten om den inte finns, och laddar samples
+  // om de inte laddats än. På iOS måste detta ske inuti en klick-händelse.
+  startaAudioContext().then(() => {
+    if (spelareInterval === null) {
+      spelareInterval = setInterval(spelaSteg, config.intervall);
+    }
+  });
 });
 
 document.getElementById("stopp").addEventListener("click", stoppaSpelaer);
@@ -1437,7 +1471,15 @@ if (!localStorage.getItem("rytmIntroVisad")) {
 
 // ============ INITIALISERING ============
 laddaState(); // Ladda sparade inställningar först
-laddaSamples(); // Ladda ljudsamples
 skapaGrid(); // Sedan skapa gridet (som även laddar rytmmönstret)
 uppdateraPatternLista(); // Ladda sparade patterns (NYT)
 uppdateraMönsterTitel(); // Uppdatera mönstertitel (NYT)
+
+// På iOS måste AudioContext skapas inuti en användarinteraktion, så samples
+// laddas lazy vid första Spela-klick. På andra plattformar kan vi ladda direkt.
+const ärIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+if (!ärIOS) {
+  // Mac/PC: skapa context och ladda samples direkt
+  hämtaAudioContext();
+  laddaSamples();
+}
