@@ -157,6 +157,18 @@ function startaAudioContext() {
   return Promise.resolve();
 }
 
+// iOS ljudfix - återuppta AudioContext när användaren återvänder till appen
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "visible" && audioContext.state === "suspended") {
+    audioContext.resume();
+  }
+});
+window.addEventListener("pageshow", function () {
+  if (audioContext.state === "suspended") {
+    audioContext.resume();
+  }
+});
+
 // Drag-variabler
 let ärIDrag = false;
 let dragRad = null;
