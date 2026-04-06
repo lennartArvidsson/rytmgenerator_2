@@ -157,15 +157,32 @@ function startaAudioContext() {
   return Promise.resolve();
 }
 
-// iOS ljudfix - återuppta AudioContext när användaren återvänder till appen
-document.addEventListener("visibilitychange", function () {
-  if (document.visibilityState === "visible" && audioContext.state === "suspended") {
+// iOS ljudfix - återuppta AudioContext vid touch (iOS kräver användargest för resume)
+document.addEventListener("touchstart", function () {
+  if (audioContext.state === "suspended") {
     audioContext.resume();
+  }
+}, { passive: true });
+
+// iOS ljudfix - starta om intervallet vid återkomst (setInterval kan ha pausats i bakgrunden)
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "visible") {
+    if (audioContext.state === "suspended") {
+      audioContext.resume();
+    }
+    if (spelareInterval !== null) {
+      clearInterval(spelareInterval);
+      spelareInterval = setInterval(spelaSteg, config.intervall);
+    }
   }
 });
 window.addEventListener("pageshow", function () {
   if (audioContext.state === "suspended") {
     audioContext.resume();
+  }
+  if (spelareInterval !== null) {
+    clearInterval(spelareInterval);
+    spelareInterval = setInterval(spelaSteg, config.intervall);
   }
 });
 
