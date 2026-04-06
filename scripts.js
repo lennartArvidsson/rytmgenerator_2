@@ -19,9 +19,9 @@ const config = {
   ljudläge: "ton", // 'ton' eller 'perkussion'
 
   // Rytmdynamik
-  dynamikSpår1: true,   // Aktivera dynamik för spår 1
-  dynamikSpår2: true,   // Aktivera dynamik för spår 2
-  dynamikNivå: 50,      // 0–100, styr hur stor skillnaden är mellan accent och svagt slag
+  dynamikSpår1: true, // Aktivera dynamik för spår 1
+  dynamikSpår2: true, // Aktivera dynamik för spår 2
+  dynamikNivå: 50, // 0–100, styr hur stor skillnaden är mellan accent och svagt slag
 
   // Utseende
   rutStorlek: 40,
@@ -151,40 +151,49 @@ const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 // iOS ljudfix - AudioContext kan suspendas av iOS när som helst, inte bara första gången
 // Returnerar Promise så att anroparen kan vänta på att kontexten är igång.
 function startaAudioContext() {
-  if (audioContext.state === "suspended") {
-    return audioContext.resume();
-  }
-  return Promise.resolve();
+  return new Promise((resolve) => {
+    if (
+      audioContext.state === "suspended" ||
+      audioContext.state === "interrupted"
+    ) {
+      audioContext.resume().then(() => {
+        // iOS-specifik fix: Spela en millisekund tystnad för att "låsa upp" hårdvaran
+        const buffer = audioContext.createBuffer(1, 1, 22050);
+        const source = audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioContext.destination);
+        source.start(0);
+        resolve();
+      });
+    } else {
+      resolve();
+    }
+  });
 }
 
-// iOS ljudfix - återuppta AudioContext vid touch (iOS kräver användargest för resume)
-document.addEventListener("touchstart", function () {
-  if (audioContext.state === "suspended") {
-    audioContext.resume();
-  }
-}, { passive: true });
+// iOS ljudfix - återuppta AudioContext vid touch
+document.addEventListener(
+  "touchstart",
+  function () {
+    startaAudioContext();
+  },
+  { passive: true },
+);
 
-// iOS ljudfix - starta om intervallet vid återkomst (setInterval kan ha pausats i bakgrunden)
-document.addEventListener("visibilitychange", function () {
+// Samlad hantering för att återhämta appen när man kommer tillbaka från bakgrunden
+function hanteraÅterkomst() {
   if (document.visibilityState === "visible") {
-    if (audioContext.state === "suspended") {
-      audioContext.resume();
-    }
-    if (spelareInterval !== null) {
-      clearInterval(spelareInterval);
-      spelareInterval = setInterval(spelaSteg, config.intervall);
-    }
+    startaAudioContext().then(() => {
+      if (spelareInterval !== null) {
+        clearInterval(spelareInterval);
+        spelareInterval = setInterval(spelaSteg, config.intervall);
+      }
+    });
   }
-});
-window.addEventListener("pageshow", function () {
-  if (audioContext.state === "suspended") {
-    audioContext.resume();
-  }
-  if (spelareInterval !== null) {
-    clearInterval(spelareInterval);
-    spelareInterval = setInterval(spelaSteg, config.intervall);
-  }
-});
+}
+
+document.addEventListener("visibilitychange", hanteraÅterkomst);
+window.addEventListener("pageshow", hanteraÅterkomst);
 
 // Drag-variabler
 let ärIDrag = false;
@@ -498,7 +507,8 @@ document.addEventListener("keydown", function (e) {
   switch (e.key.toLowerCase()) {
     case " ": // Space - Toggle play/stop
       e.preventDefault();
-      startaAudioContext().then(function () { // iOS ljudfix
+      startaAudioContext().then(function () {
+        // iOS ljudfix
         if (spelareInterval === null) {
           spelareInterval = setInterval(spelaSteg, config.intervall);
         } else {
@@ -596,9 +606,11 @@ function laddaState() {
       config.volymTrack2 * 100,
     );
 
-    const dynamikNivå = config.dynamikNivå !== undefined ? config.dynamikNivå : 50;
+    const dynamikNivå =
+      config.dynamikNivå !== undefined ? config.dynamikNivå : 50;
     document.getElementById("dynamik-nivå").value = dynamikNivå;
-    document.getElementById("dynamik-nivå-värde").textContent = dynamikNivåText(dynamikNivå);
+    document.getElementById("dynamik-nivå-värde").textContent =
+      dynamikNivåText(dynamikNivå);
 
     document.getElementById("taktart").value = config.taktart;
     document.getElementById("antal-tracks").value = config.antalRader;
@@ -1039,13 +1051,12 @@ function beräknaDynamikFaktor(position, taktart, minstaEnhet) {
   const relativ = mönster[slagIndex % mönster.length]; // 0..1
 
   // Skala: vid nivå 0 → alla = 1.0; vid nivå 100 → accent = 1.0, svagast = minFaktor
-  const minFaktor = 0.40; // svagaste möjliga slag vid max dynamik
+  const minFaktor = 0.4; // svagaste möjliga slag vid max dynamik
   const t = config.dynamikNivå / 100; // 0..1
   return 1.0 - t * (1.0 - minFaktor) * (1.0 - relativ);
 }
 
 // =====================================
-
 
 // Ljud-funktion med spår 1/spår 2 - nu med dynamisk tonlängd, perkussion och rytmdynamik
 function spelaLjud(radIndex, blockLängd = 1, position = 0) {
@@ -1060,7 +1071,8 @@ function spelaPerkussion(radIndex, position = 0) {
   const ljudnamn = radIndex === 0 ? valdDiskantLjud : valdBasLjud;
   const sample = samples.ljudfiler[ljudnamn];
   const basVolym = radIndex === 0 ? config.volym : config.volymTrack2;
-  const dynamikAktiv = radIndex === 0 ? config.dynamikSpår1 : config.dynamikSpår2;
+  const dynamikAktiv =
+    radIndex === 0 ? config.dynamikSpår1 : config.dynamikSpår2;
 
   if (!sample) {
     console.warn("Sample ej laddat för rad", radIndex, ljudnamn);
@@ -1093,7 +1105,8 @@ function spelaTon(radIndex, blockLängd = 1, position = 0) {
   const basLängd = config.intervall / 1000;
   const tonLängd = basLängd * blockLängd * 0.9;
 
-  const dynamikAktiv = radIndex === 0 ? config.dynamikSpår1 : config.dynamikSpår2;
+  const dynamikAktiv =
+    radIndex === 0 ? config.dynamikSpår1 : config.dynamikSpår2;
   const dynamikFaktor = dynamikAktiv
     ? beräknaDynamikFaktor(position, config.taktart, config.minstaEnhet)
     : 1.0;
@@ -1125,11 +1138,6 @@ function spelaTon(radIndex, blockLängd = 1, position = 0) {
 
 // Uppspelningsloop
 function spelaSteg() {
-  // iOS kan suspendera AudioContext i bakgrunden - återuppta om nödvändigt
-  if (audioContext.state === "suspended") {
-    audioContext.resume();
-  }
-
   rutor.forEach((rad) => rad.forEach((r) => r.classList.remove("spelar")));
 
   for (let rad = 0; rad < config.antalRader; rad++) {
@@ -1189,7 +1197,8 @@ document
 
 // Spelknappar
 document.getElementById("spela").addEventListener("click", function () {
-  startaAudioContext().then(function () { // iOS ljudfix
+  startaAudioContext().then(function () {
+    // iOS ljudfix
     if (spelareInterval === null) {
       spelareInterval = setInterval(spelaSteg, config.intervall);
     }
